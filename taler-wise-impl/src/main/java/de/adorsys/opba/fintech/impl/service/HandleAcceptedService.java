@@ -28,8 +28,8 @@ public class HandleAcceptedService {
     private final SessionLogicService sessionLogicService;
 
     ResponseEntity handleAccepted(ConsentRepository consentRepository, ConsentType consentType, String bankId,
-                                  String fintechRedirectCode, SessionEntity sessionEntity, HttpHeaders headers) {
-        return handleAccepted(consentRepository, consentType, bankId, null, fintechRedirectCode, sessionEntity, headers);
+                                  String fintechRedirectCode, HttpHeaders headers) {
+        return handleAccepted(consentRepository, consentType, bankId, null, fintechRedirectCode, headers);
     }
 
     ResponseEntity handleAccepted(ConsentRepository consentRepository, ConsentType consentType, String bankId, String accountId,
@@ -48,13 +48,13 @@ public class HandleAcceptedService {
                         ))
                 );
         log.debug("created consent which is not confirmend yet for bank {}, user {}, type {}, auth {}",
-                bankId, sessionEntity.getUserEntity().getLoginUserName(), consentType, consent.getTppAuthId());
+                bankId, consentType, consent.getTppAuthId());
         consentRepository.save(consent);
 
         URI location = headers.getLocation();
-        log.info("call was accepted, but redirect has to be done for serviceSessionId:{} authID:{} location:{}", consent.getTppServiceSessionId(), consent.getTppAuthId(), location);
+        log.info("call was accepted, but redirect has to be done for authID:{} location:{}", consent.getTppAuthId(), location);
 
-        HttpHeaders responseHeaders = sessionLogicService.startRedirect(sessionEntity.getUserEntity(), consent.getTppAuthId());
+        HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add(FIN_TECH_REDIRECT_CODE, fintechRedirectCode);
         responseHeaders.setLocation(location);
 
@@ -62,29 +62,27 @@ public class HandleAcceptedService {
     }
 
     ResponseEntity handleAccepted(PaymentRepository paymentRepository, ConsentType consentType, String bankId, String accountId,
-                                  String fintechRedirectCode, SessionEntity sessionEntity, HttpHeaders headers, String paymentProduct) {
-        String authId = validateSession(headers);
+                                  String fintechRedirectCode, HttpHeaders headers, String paymentProduct) {
 
+        String authId = validateSession(headers);
         PaymentEntity payment = paymentRepository.findByTppAuthId(authId)
                 .orElseGet(() -> paymentRepository.save(
                         PaymentEntity.builder()
-                                .userEntity(sessionEntity.getUserEntity())
+                                .userEntity(null)
                                 .bankId(bankId)
                                 .accountId(accountId)
-                                .tppAuthId(authId)
-                                .tppServiceSessionId(UUID.fromString(headers.getFirst(SERVICE_SESSION_ID)))
                                 .paymentProduct(paymentProduct)
 
                         .build()
                 ));
-        log.debug("created payment which is not confirmend yet for bank {}, user {}, type {}, auth {}",
-                bankId, sessionEntity.getUserEntity().getLoginUserName(), consentType, payment.getTppAuthId());
+        log.debug("created payment which is not confirmend yet for bank {}, user {}, type {}",
+                bankId, "user identification", consentType);
         paymentRepository.save(payment);
 
         URI location = headers.getLocation();
-        log.info("call was accepted, but redirect has to be done for authID:{} location:{}", payment.getTppAuthId(), location);
+        log.info("call was accepted, but redirect has to be done for location:{}", location);
 
-        HttpHeaders responseHeaders = sessionLogicService.startRedirect(sessionEntity.getUserEntity(), payment.getTppAuthId());
+        HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add(FIN_TECH_REDIRECT_CODE, fintechRedirectCode);
         responseHeaders.setLocation(location);
 

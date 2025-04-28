@@ -47,7 +47,6 @@ public class PaymentService {
     private final TppPisPaymentStatusClient tppPisPaymentStatusClient;
     private final TppProperties tppProperties;
     private final RestRequestContext restRequestContext;
-    private final SessionLogicService sessionLogicService;
     private final FintechUiConfig uiConfig;
     private final RedirectHandlerService redirectHandlerService;
     private final HandleAcceptedService handleAcceptedService;
@@ -58,7 +57,6 @@ public class PaymentService {
                                                       String fintechBrandLoggingInformation, String fintechNotificationURI, String fintechRedirectNotificationContentPreferred) {
         log.info("fill paramemeters for payment");
         final String fintechRedirectCode = UUID.randomUUID().toString();
-        SessionEntity sessionEntity = sessionLogicService.getSession();
         PaymentInitiation payment = new PaymentInitiation();
         payment.setCreditorAccount(getAccountReference(singlePaymentInitiationRequest.getCreditorIban()));
         payment.setDebtorAccount(getAccountReference(singlePaymentInitiationRequest.getDebitorIban()));
@@ -69,7 +67,7 @@ public class PaymentService {
         log.info("start call for payment {} {}", fintechOkUrl, fintechNOkUrl);
         var paymentProduct = singlePaymentInitiationRequest.isInstantPayment() ? INSTANT_SEPA_PAYMENT_PRODUCT : SEPA_PAYMENT_PRODUCT;
         ResponseEntity<PaymentInitiationResponse> responseOfTpp = tppPisSinglePaymentClient.initiatePayment(
-                sessionEntity.getUserEntity().getFintechUserId(),
+                "fintechUserId",
                 RedirectUrlsEntity.buildPaymentOkUrl(uiConfig, fintechRedirectCode),
                 RedirectUrlsEntity.buildPaymentNokUrl(uiConfig, fintechRedirectCode),
                 UUID.fromString(restRequestContext.getRequestId()),
@@ -91,12 +89,11 @@ public class PaymentService {
             throw new RuntimeException("Did expect status 202 from tpp, but got " + responseOfTpp.getStatusCodeValue());
         }
         redirectHandlerService.registerRedirectStateForSession(fintechRedirectCode, fintechOkUrl, fintechNOkUrl);
-        return handleAcceptedService.handleAccepted(paymentRepository, ConsentType.PIS, bankProfileId, accountId, fintechRedirectCode, sessionEntity,
+        return handleAcceptedService.handleAccepted(paymentRepository, ConsentType.PIS, bankProfileId, accountId, fintechRedirectCode,
                 responseOfTpp.getHeaders(), paymentProduct);
     }
 
     public ResponseEntity<List<PaymentInitiationWithStatusResponse>> retrieveAllSinglePayments(String bankProfileID, String accountId) {
-        SessionEntity sessionEntity = sessionLogicService.getSession();
         // TODO https://app.zenhub.com/workspaces/open-banking-gateway-5dd3b3daf010250001260675/issues/adorsys/open-banking-gateway/812
         // TODO https://app.zenhub.com/workspaces/open-banking-gateway-5dd3b3daf010250001260675/issues/adorsys/open-banking-gateway/794
         List<PaymentEntity> payments = paymentRepository.findByUserEntityAndBankIdAndAccountIdAndPaymentConfirmed(sessionEntity.getUserEntity(), bankProfileID, accountId, true);

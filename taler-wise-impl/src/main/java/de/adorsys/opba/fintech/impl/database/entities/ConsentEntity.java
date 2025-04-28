@@ -27,7 +27,6 @@ public class ConsentEntity {
         this.consentType = consentType;
         this.userEntity = userEntity;
         this.consentConfirmed = false;
-        this.tppServiceSessionId = tppServiceSessionId;
         this.tppAuthId = tppAuthId;
         this.bankId = bankId;
         this.accountId = accountId;
@@ -42,7 +41,6 @@ public class ConsentEntity {
     private String bankId;
     private String accountId;
     private String tppAuthId;
-    private UUID tppServiceSessionId;
     private ConsentType consentType;
     @Column(nullable = false)
     private OffsetDateTime creationTime;

@@ -24,7 +24,6 @@ public class RedirectHandlerService {
     private static final String LOCATION_HEADER = "Location";
     private final FintechUiConfig uiConfig;
     private final RedirectUrlRepository redirectUrlRepository;
-    private final SessionLogicService sessionLogicService;
 
     @Transactional
     public RedirectUrlsEntity registerRedirectStateForSession(final String finTechRedirectCode, final String okPath, final String nokPath) {
@@ -68,13 +67,13 @@ public class RedirectHandlerService {
     }
 
     private ResponseEntity prepareRedirectToReadResultResponse(String redirectUrl) {
-        HttpHeaders headers = sessionLogicService.finishRedirect();
+        HttpHeaders headers = new HttpHeaders();
         headers.put(LOCATION_HEADER, singletonList(redirectUrl));
         return new ResponseEntity<>(headers, HttpStatus.ACCEPTED);
     }
 
     private ResponseEntity prepareErrorRedirectResponse(String redirectUrl) {
-        HttpHeaders headers = sessionLogicService.finishRedirect();
+        HttpHeaders headers = new HttpHeaders();
         headers.put(LOCATION_HEADER, singletonList(redirectUrl));
         return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
     }
