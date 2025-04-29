@@ -6,7 +6,6 @@ import de.adorsys.opba.fintech.impl.config.FintechUiConfig;
 import de.adorsys.opba.fintech.impl.controller.utils.RestRequestContext;
 import de.adorsys.opba.fintech.impl.database.entities.PaymentEntity;
 import de.adorsys.opba.fintech.impl.database.entities.RedirectUrlsEntity;
-import de.adorsys.opba.fintech.impl.database.entities.SessionEntity;
 import de.adorsys.opba.fintech.impl.database.repositories.PaymentRepository;
 import de.adorsys.opba.fintech.impl.mapper.PaymentInitiationWithStatusResponseMapper;
 import de.adorsys.opba.fintech.impl.properties.TppProperties;
@@ -67,7 +66,7 @@ public class PaymentService {
         log.info("start call for payment {} {}", fintechOkUrl, fintechNOkUrl);
         var paymentProduct = singlePaymentInitiationRequest.isInstantPayment() ? INSTANT_SEPA_PAYMENT_PRODUCT : SEPA_PAYMENT_PRODUCT;
         ResponseEntity<PaymentInitiationResponse> responseOfTpp = tppPisSinglePaymentClient.initiatePayment(
-                "fintechUserId",
+                payment.getRemittanceInformationUnstructured(),              //a public key need to be pass here
                 RedirectUrlsEntity.buildPaymentOkUrl(uiConfig, fintechRedirectCode),
                 RedirectUrlsEntity.buildPaymentNokUrl(uiConfig, fintechRedirectCode),
                 UUID.fromString(restRequestContext.getRequestId()),
@@ -88,6 +87,7 @@ public class PaymentService {
         if (responseOfTpp.getStatusCode() != HttpStatus.ACCEPTED) {
             throw new RuntimeException("Did expect status 202 from tpp, but got " + responseOfTpp.getStatusCodeValue());
         }
+
         redirectHandlerService.registerRedirectStateForSession(fintechRedirectCode, fintechOkUrl, fintechNOkUrl);
         return handleAcceptedService.handleAccepted(paymentRepository, ConsentType.PIS, bankProfileId, accountId, fintechRedirectCode,
                 responseOfTpp.getHeaders(), paymentProduct);
@@ -96,7 +96,7 @@ public class PaymentService {
     public ResponseEntity<List<PaymentInitiationWithStatusResponse>> retrieveAllSinglePayments(String bankProfileID, String accountId) {
         // TODO https://app.zenhub.com/workspaces/open-banking-gateway-5dd3b3daf010250001260675/issues/adorsys/open-banking-gateway/812
         // TODO https://app.zenhub.com/workspaces/open-banking-gateway-5dd3b3daf010250001260675/issues/adorsys/open-banking-gateway/794
-        List<PaymentEntity> payments = paymentRepository.findByUserEntityAndBankIdAndAccountIdAndPaymentConfirmed(sessionEntity.getUserEntity(), bankProfileID, accountId, true);
+        List<PaymentEntity> payments = paymentRepository.findByBankIdAndAccountIdAndPaymentConfirmed(bankProfileID, accountId, true);
         if (payments.isEmpty()) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
@@ -112,7 +112,7 @@ public class PaymentService {
                     null,
                     tppProperties.getFintechDataProtectionPassword(),
                     UUID.fromString(bankProfileID),
-                    payment.getTppServiceSessionId()).getBody();
+                    null).getBody();
             PaymentInitiationWithStatusResponse paymentInitiationWithStatusResponse = Mappers
                     .getMapper(PaymentInitiationWithStatusResponseMapper.class)
                     .mapFromTppToFintech(body);

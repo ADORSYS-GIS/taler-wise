@@ -21,22 +21,12 @@ public class ConsentRetrievalService {
     private final AuthorizeService authorizeService;
     private final ConsentRepository consentRepository;
 
-    public ConsentRetrievalResult get(String userid, String password) {
+    public ConsentRetrievalResult get() {
         ConsentRetrievalResult consentRetrievalResult = new ConsentRetrievalResult();
 
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.password(password);
-        loginRequest.username(userid);
-        Optional<UserEntity> userEntity = authorizeService.loginWithPassword(loginRequest);
-        if (!userEntity.isPresent()) {
-            return consentRetrievalResult;
-        }
-
-        consentRetrievalResult.userid = userEntity.get().getFintechUserId();
         consentRetrievalResult.bankIdConsentIdList = new ArrayList<>();
 
-        consentRepository.findByUserEntityAndConsentTypeAndConsentConfirmedOrderByCreationTimeDesc(
-            userEntity.get(),
+        consentRepository.findByConsentTypeAndConsentConfirmedOrderByCreationTimeDesc(
             ConsentType.AIS,
             true).stream().forEach(el -> {
                 consentRetrievalResult.getBankIdConsentIdList().add(new BankId2ConsentId(el.getBankId(), el.getCreationTime().toString(), el.getTppServiceSessionId()));
@@ -47,7 +37,6 @@ public class ConsentRetrievalService {
 
     @Data
     public static class ConsentRetrievalResult {
-        private String userid;
         private List<BankId2ConsentId> bankIdConsentIdList;
     }
 

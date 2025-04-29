@@ -2,7 +2,7 @@ package de.adorsys.opba.fintech.impl.service;
 
 import de.adorsys.opba.fintech.impl.database.entities.ConsentEntity;
 import de.adorsys.opba.fintech.impl.database.entities.PaymentEntity;
-import de.adorsys.opba.fintech.impl.database.entities.SessionEntity;
+import de.adorsys.opba.fintech.impl.database.entities.UserEntity;
 import de.adorsys.opba.fintech.impl.database.repositories.ConsentRepository;
 import de.adorsys.opba.fintech.impl.database.repositories.PaymentRepository;
 import de.adorsys.opba.fintech.impl.tppclients.ConsentType;
@@ -25,7 +25,6 @@ import static org.springframework.http.HttpStatus.ACCEPTED;
 @Slf4j
 @RequiredArgsConstructor
 public class HandleAcceptedService {
-    private final SessionLogicService sessionLogicService;
 
     ResponseEntity handleAccepted(ConsentRepository consentRepository, ConsentType consentType, String bankId,
                                   String fintechRedirectCode, HttpHeaders headers) {
@@ -33,18 +32,16 @@ public class HandleAcceptedService {
     }
 
     ResponseEntity handleAccepted(ConsentRepository consentRepository, ConsentType consentType, String bankId, String accountId,
-                                  String fintechRedirectCode, SessionEntity sessionEntity, HttpHeaders headers) {
+                                  String fintechRedirectCode, HttpHeaders headers) {
         String authId = validateSession(headers);
 
         ConsentEntity consent = consentRepository.findByTppAuthId(authId)
                 .orElseGet(() -> consentRepository.save(
                         new ConsentEntity(
                                 consentType,
-                                sessionEntity.getUserEntity(),
                                 bankId,
                                 accountId,
-                                authId,
-                                UUID.fromString(headers.getFirst(SERVICE_SESSION_ID))
+                                authId
                         ))
                 );
         log.debug("created consent which is not confirmend yet for bank {}, user {}, type {}, auth {}",

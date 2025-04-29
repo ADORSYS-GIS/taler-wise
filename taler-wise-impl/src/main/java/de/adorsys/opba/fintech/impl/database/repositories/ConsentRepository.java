@@ -18,7 +18,7 @@ public interface ConsentRepository extends CrudRepository<ConsentEntity, Long> {
     List<ConsentEntity> findListByUserEntityAndBankIdAndConsentTypeAndConsentConfirmed(UserEntity userEntity, String
         bankId, ConsentType consentType, Boolean consentConfirmed);
 
-    List<ConsentEntity> findByUserEntityAndConsentTypeAndConsentConfirmedOrderByCreationTimeDesc(UserEntity userEntity, ConsentType consentType, Boolean consentConfirmed);
+    List<ConsentEntity> findByConsentTypeAndConsentConfirmedOrderByCreationTimeDesc(ConsentType consentType, Boolean consentConfirmed);
 
     @Modifying
     long deleteByUserEntityAndBankId(UserEntity entity, String bankId);

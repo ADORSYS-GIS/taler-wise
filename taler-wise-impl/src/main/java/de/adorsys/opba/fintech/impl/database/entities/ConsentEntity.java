@@ -23,9 +23,8 @@ import java.util.UUID;
 @Slf4j
 @NoArgsConstructor
 public class ConsentEntity {
-    public ConsentEntity(ConsentType consentType, UserEntity userEntity, String bankId, String accountId, String tppAuthId, UUID tppServiceSessionId) {
+    public ConsentEntity(ConsentType consentType, String bankId, String accountId, String tppAuthId) {
         this.consentType = consentType;
-        this.userEntity = userEntity;
         this.consentConfirmed = false;
         this.tppAuthId = tppAuthId;
         this.bankId = bankId;
@@ -47,7 +46,5 @@ public class ConsentEntity {
 
     @Column(nullable = false)
     private Boolean consentConfirmed;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserEntity userEntity;
 
 }

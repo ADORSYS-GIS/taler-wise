@@ -3,7 +3,6 @@ package de.adorsys.opba.fintech.impl.controller;
 import de.adorsys.opba.fintech.api.model.generated.SinglePaymentInitiationRequest;
 import de.adorsys.opba.fintech.api.resource.generated.FintechSinglePaymentInitiationApi;
 import de.adorsys.opba.fintech.impl.service.PaymentService;
-import de.adorsys.opba.fintech.impl.service.SessionLogicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentInitiationApi {
     private final PaymentService paymentService;
-    private final SessionLogicService sessionLogicService;
 
     @Override
     public ResponseEntity<Void> initiateSinglePayment(
@@ -33,18 +31,12 @@ public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentI
             String fintechBrandLoggingInformation,
             String fintechNotificationURI,
             String fintechRedirectNotificationContentPreferred) {
-        log.debug("got initiate payment requrest");
+        log.debug("got initiate payment request");
 
-        if (!sessionLogicService.isSessionAuthorized()) {
-            log.warn("singlePaymentPost failed: user is not authorized!");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        return sessionLogicService.addSessionMaxAgeToHeader(
-                paymentService.initiateSinglePayment(bankId, accountId, body,
+        return paymentService.initiateSinglePayment(bankId, accountId, body,
                         fintechRedirectURLOK, fintechRedirectURLNOK, xPisPsuAuthenticationRequired,
                         fintechDecoupledPreferred, fintechBrandLoggingInformation, fintechNotificationURI,
                         fintechRedirectNotificationContentPreferred)
-        );
+        ;
     }
 }
