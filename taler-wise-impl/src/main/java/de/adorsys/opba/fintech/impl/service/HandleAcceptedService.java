@@ -2,7 +2,6 @@ package de.adorsys.opba.fintech.impl.service;
 
 import de.adorsys.opba.fintech.impl.database.entities.ConsentEntity;
 import de.adorsys.opba.fintech.impl.database.entities.PaymentEntity;
-import de.adorsys.opba.fintech.impl.database.entities.UserEntity;
 import de.adorsys.opba.fintech.impl.database.repositories.ConsentRepository;
 import de.adorsys.opba.fintech.impl.database.repositories.PaymentRepository;
 import de.adorsys.opba.fintech.impl.tppclients.ConsentType;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.UUID;
 
 import static de.adorsys.opba.fintech.impl.tppclients.HeaderFields.FIN_TECH_REDIRECT_CODE;
 import static de.adorsys.opba.fintech.impl.tppclients.HeaderFields.SERVICE_SESSION_ID;
@@ -65,7 +63,7 @@ public class HandleAcceptedService {
         PaymentEntity payment = paymentRepository.findByTppAuthId(authId)
                 .orElseGet(() -> paymentRepository.save(
                         PaymentEntity.builder()
-                                .userEntity(null)
+
                                 .bankId(bankId)
                                 .accountId(accountId)
                                 .paymentProduct(paymentProduct)

@@ -5,7 +5,6 @@ import de.adorsys.opba.fintech.api.resource.generated.FintechSinglePaymentInitia
 import de.adorsys.opba.fintech.impl.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +19,6 @@ public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentI
     @Override
     public ResponseEntity<Void> initiateSinglePayment(
             UUID xRequestID,
-            String xXsrfToken,
             String fintechRedirectURLOK,
             String fintechRedirectURLNOK,
             String bankId,
@@ -36,7 +34,6 @@ public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentI
         return paymentService.initiateSinglePayment(bankId, accountId, body,
                         fintechRedirectURLOK, fintechRedirectURLNOK, xPisPsuAuthenticationRequired,
                         fintechDecoupledPreferred, fintechBrandLoggingInformation, fintechNotificationURI,
-                        fintechRedirectNotificationContentPreferred)
-        ;
+                        fintechRedirectNotificationContentPreferred);
     }
 }

@@ -21,13 +21,11 @@ public class FintechRetrieveAllSinglePaymentsImpl implements FintechRetrieveAllS
     public ResponseEntity<List<PaymentInitiationWithStatusResponse>> retrieveAllSinglePayments(
             String bankId,
             String accountId,
-            UUID xRequestID,
-            String xsrfToken
+            UUID xRequestID
     ) {
         log.debug("got list all payment request");
 
 
-        return paymentService.retrieveAllSinglePayments(bankId, accountId)
-        ;
+        return paymentService.retrieveAllSinglePayments(bankId, accountId);
     }
 }

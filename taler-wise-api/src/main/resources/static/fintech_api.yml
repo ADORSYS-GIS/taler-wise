@@ -387,7 +387,6 @@ paths:
         - $ref: "#/components/parameters/account-id"
         #header
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
 
       responses:
         "200":
@@ -407,7 +406,6 @@ paths:
         - $ref: "#/components/parameters/account-id"
         #header
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
         - $ref: "#/components/parameters/X-Psu-Authentication-Required"
         - $ref: "#/components/parameters/Fintech-Redirect-URL-OK"
         - $ref: "#/components/parameters/Fintech-Redirect-URL-NOK"
@@ -2062,8 +2060,6 @@ components:
       title: AccountBalance
       type: object
       properties:
-        balanceAmount:
-          $ref: "#/components/schemas/Amount"
         balanceType:
           type: string
         iban:

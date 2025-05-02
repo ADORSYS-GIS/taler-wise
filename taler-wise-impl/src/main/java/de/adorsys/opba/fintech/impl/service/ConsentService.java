@@ -1,6 +1,5 @@
 package de.adorsys.opba.fintech.impl.service;
 
-import de.adorsys.opba.fintech.impl.database.entities.SessionEntity;
 import de.adorsys.opba.fintech.impl.database.repositories.ConsentRepository;
 import de.adorsys.opba.fintech.impl.properties.TppProperties;
 import de.adorsys.opba.fintech.impl.tppclients.TppConsentClient;
@@ -56,7 +55,7 @@ public class ConsentService {
     }
 
     @Transactional
-    public void deleteAllConsentsOfBank(SessionEntity sessionEntity, String bankId) {
-        consentRepository.deleteByUserEntityAndBankId(sessionEntity.getUserEntity(), bankId);
+    public void deleteAllConsentsOfBank(String accountId, String bankId) {
+        consentRepository.deleteByAccountIdAndBankId(accountId, bankId);
     }
 }
