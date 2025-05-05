@@ -43,10 +43,10 @@ jobs:
           cd ADORSYS-GIS/taler-wise
           mvn clean package # Construit votre projet taler-wise
 
-      - name: Run tests for taler-wise (si vous en avez)
+      - name: Run tests for taler-wise
         run: |
           cd ADORSYS-GIS/taler-wise
           mvn test
 
-      - name: Simple status check (exemple)
+      - name: Simple status check
         run: echo "Pull request checks completed."
