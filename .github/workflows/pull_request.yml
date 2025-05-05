@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: taler-wise
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
