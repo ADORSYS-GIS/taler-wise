@@ -24,12 +24,27 @@ jobs:
         with:
           maven-version: '3.6.3'
 
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
+      - name: Checkout open-banking-gateway code
+        uses: actions/checkout@v4
+        with:
+          repository: 'adorsys/open-banking-gateway'
+          ref: 'v1.0.1'
+          path: open-banking-gateway
 
-      - name: Run Unit Tests with Maven
-        run: mvn test
+      - name: Install open-banking-gateway locally
+        run: |
+          cd open-banking-gateway
+          mvn clean install -DskipTests
 
+      - name: Build taler-wise
+        run: |
+          cd taler-wise
+          mvn clean package # Construit votre projet taler-wise
+
+      - name: Run tests for taler-wise (si vous en avez)
+        run: |
+          cd taler-wise
+          mvn test
 
       - name: Simple status check (exemple)
         run: echo "Pull request checks completed."
