@@ -56,7 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @Disabled //will work on it in the next ticket
-    @SuppressWarnings("PMD.UnusedLocalVariable") // will work on it in the next ticket
+@SuppressWarnings("PMD.UnusedLocalVariable") // will work on it in the next ticket
 class FinTechBankSearchApiTest extends FinTechApiBaseTest {
     public static final String FIN_TECH_AUTH_URL = "/v1/login";
     private static final String FIN_TECH_BANK_SEARCH_URL = "/v1/search/bankSearch";
