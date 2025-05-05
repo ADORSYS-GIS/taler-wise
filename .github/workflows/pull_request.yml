@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          path: taler-wise
+          path: ADORSYS-GIS/taler-wise
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -40,12 +40,12 @@ jobs:
 
       - name: Build taler-wise
         run: |
-          cd taler-wise
+          cd ADORSYS-GIS/taler-wise
           mvn clean package # Construit votre projet taler-wise
 
       - name: Run tests for taler-wise (si vous en avez)
         run: |
-          cd taler-wise
+          cd ADORSYS-GIS/taler-wise
           mvn test
 
       - name: Simple status check (exemple)
