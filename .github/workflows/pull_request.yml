@@ -1,0 +1,35 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [opened, synchronize, labeled, unlabeled]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: '3.6.x'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Run Unit Tests with Maven
+        run: mvn test
+
+
+      - name: Simple status check (exemple)
+        run: echo "Pull request checks completed."
