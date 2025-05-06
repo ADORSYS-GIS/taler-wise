@@ -4,46 +4,9 @@ info:
   version: "1.0.0"
   title: Open Banking Gateway FinTech Example API
   description: |
-    This is a sample API that shows how to develop FinTech use cases that invoke banking APIs.
-
-    #### User Agent and Cookies
-    This Api assumes
-    * that the PsuUserAgent (hosting the FinTechUI) is a modern web browser that stores httpOnly cookies sent with the redirect under the given domain and path as defined by [RFC 6265](https://tools.ietf.org/html/rfc6265).
-    * that any other PsuUserAgent like a native mobile or a desktop application can simulate this same behavior of a modern browser with respect to Cookies.
-
-    #### SessionCookies and XSRF
-    After a PSU is authenticated with the FinTech environment (either through the simple login interface defined here, or through an identity provider),
-    the FinTechApi will establish a session with the FinTechUI. This is done by the mean of using a cookie called SessionCookie.
-    This SessionCookie is protected by a corresponding xsrfToken. The response that sets a SessionCookie also carries a corresponding xsrfToken in the response header named "X-XSRF-TOKEN".
-
-    It is the responsibility of the FinTechUI to :
-    * parse and store this xsrfToken so that a refresh of a browser window can work. This shall be done using user agent capabilities.
-    A web browser application might decide to store the xsrfToken in the browser localStorage, as the cookie we set are all considered persistent.
-    * make sure that each subsequent request that is carrying the SessionCookie also carries the corresponding xsrfToken as header field (see the request path).
-    * remove this xsrfToken from the localStorage when the corresponding SessionCookie is deleted by a server response (setting cookie value to null).
-
-    The main difference between an xsrfToken and a SessionCookie is that the sessionCookie is automatically sent with each matching request. The xsrfToken must be explicitely read and sent by application.
-
-    #### API- vs. UI-Redirection
-    For simplicity, this Framework is designed to redirect to FinTechUI not to FinTechApi.
-
-    #### Explicite vs. Implicite Redirection
-    We define an "Implicite redirection" a case where a web browser react to 30X reponse and automatically redirects to the attached endpoint. We define an
-    "Explicite Redirection" as a case where the UI-Application reacts to a 20X response, explicitely parses the attached __Location__ header an uses it to reload
-    the new page in the browser window (or start the new UI-Application in case of native apps).
-
-    This framework advocates for explicite redirection passing a __20X__ response to the FinTechUI toghether with the __Location__ parameter.
-
-    Processing a response that initiates a redirect, the FinTechUI makes sure following happens,
-    * that the exisitng __SessionCookie__ is deleted, as the user will not have a chance for an explicite logout,
-    * that the corresponding xsrfToken is deleted from the local storage,
-    * that a RedirectCookie set is stored (in case UI is not a web browser), so the user can be authenticated against it when sent back to the FinTechUI. The expiration of the RedirectCookie shall be set to the expected duration of the redirect,
-    * that the corresponding xsrfToken is stored in the local storage (under the same cookie path as the RedirectCookie)
-
-    #### Redirecting to the ConsentAuthorisationApi
-    For a redirection to the ConsentAuthorisationApi, a generated AUTH-ID is added to the cookie path and used to distinguish authorization processes from each order.
-    This information (AUTH-ID) must be contained in the back redirect url sent to the ConsentAuthorisationApi in the back channel, so that the FinTechUI can invoke
-    the correct code2Token endpoint when activated.
+    This API enables stateless access to initiate and authorize payments
+    (top-up) using bank interfaces without relying on sessions or cookies. It is designed
+    for direct integration with mobile or backend clients.
 
 externalDocs:
   url: "https://adorsys.github.io/open-banking-gateway"
@@ -59,119 +22,7 @@ tags:
     description: Example Financial web service provided by the FinTech.
   - name: FinTechBankSearch
     description: Example bank search funtionality fro the perspective of a FinTech.
-  - name: FinTechAccountInformation
-    description: Example Account Information Service as defined by a FinTechApi.
-
 paths:
-  /v1/login:
-    post:
-      tags:
-        - FinTechAuthorization
-      operationId: loginPOST
-      summary: Identifies the PSU in the Realm of the FinTechApi.
-      description: |
-        Simple login interface used to establish a session between
-        PSU and FinTech. Real application will delegate login to an oAuth2
-        Identity provider.
-      parameters:
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-      requestBody:
-        description: Login request
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/loginRequest"
-        required: true
-      x-codegen-request-body-name: loginRequest
-      responses:
-        "200":
-          $ref: "#/components/responses/200_UserProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/login/oauth2:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: callbackGetLogin
-      summary: Oauth2 callback to identify user.
-      description: |
-        Oauth2 callback to authenticate user using some Oauth2 identity provider account. Provider id is set inside state.
-      parameters:
-        #query
-        - name: code
-          in: query
-          required: true
-          description: OAuth2 redirect code
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: OAuth2 redirect state
-          schema:
-            type: string
-        - name: scope
-          in: query
-          required: true
-          description: OAuth2 requested scope
-          schema:
-            type: string
-        - name: error
-          in: query
-          required: false
-          description: OAuth2 error
-          schema:
-            type: string
-      responses:
-        "200":
-          $ref: "#/components/responses/200_UserProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/oauth2/{idpProvider}/login:
-    post:
-      tags:
-        - FinTechOauth2Authentication
-      operationId: oauthLoginPOST
-      summary: Identifies the PSU in the Realm of the FinTechApi using his Gmail or other IDP provider account.
-      description: |
-        Use Oauth2 for Gmail users' account to identify him
-      parameters:
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        # path
-        - in: path
-          name: idpProvider
-          schema:
-            type: string
-            enum: [gmail]
-          required: true
-          description: IDP provider id for Oauth2 authentication (i.e. `gmail`)
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ToOauth2"
-
-  /v1/logout:
-    post:
-      tags:
-        - FinTechAuthorization
-      operationId: logoutPOST
-      summary: logs out user
-      description: If user can be authenticated, user will be logged out.
-      parameters:
-        #headers
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          description: nothing returned
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
   /v1/search/bankSearch:
     get:
       tags:
@@ -182,7 +33,6 @@ paths:
       parameters:
         #headers
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
         #query
         - name: keyword
           in: query
@@ -217,7 +67,6 @@ paths:
       parameters:
         #header
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
         - name: bankProfileId
           in: query
           description: Identifier of the bank to be loaded.
@@ -229,92 +78,6 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/200_BankProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
-
-  /v1/ais/banks/{bank-id}/accounts:
-    get:
-      tags:
-        - FinTechAccountInformation
-      operationId: aisAccountsGET
-      summary: Provides list of available accounts for the given bank
-      description: |
-        Read the identifiers of the available payment accounts.
-
-        If required by the bank, PSU consent will be obtained before returning
-        the list of bank accounts.
-
-        Returns all identifiers of the accounts, to which an account access has
-        been granted to by the PSU. In addition, relevant information about the
-        accounts and hyperlinks to corresponding account information resources
-        are provided if a related consent has been already granted.
-      parameters:
-        #path
-        - $ref: "#/components/parameters/bank-id"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        - $ref: "#/components/parameters/X-Psu-Authentication-Required"
-        - $ref: "#/components/parameters/Fintech-Redirect-URL-OK"
-        - $ref: "#/components/parameters/Fintech-Redirect-URL-NOK"
-        - $ref: "#/components/parameters/LoARetrievalInformation"
-        - $ref: "#/components/parameters/X-Create-Consent-If-None"
-        - $ref: "#/components/parameters/Fintech-Decoupled-Preferred"
-        - $ref: "#/components/parameters/Fintech-Brand-Logging-Information"
-        - $ref: "#/components/parameters/Fintech-Notification-URI"
-        - $ref: "#/components/parameters/Fintech-Redirect-Notification-Content-Preferred"
-        #query
-        - $ref: "#/components/parameters/withBalance"
-        - $ref: "#/components/parameters/online"
-
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          $ref: "#/components/responses/200_AccountList"
-        "202":
-          $ref: "#/components/responses/202_ToConsentAuthApi"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
-
-  /v1/ais/banks/{bank-id}/accounts/{account-id}/transactions:
-    get:
-      tags:
-        - FinTechAccountInformation
-      operationId: aisTransactionsGET
-      summary: Returns the list of transactions of the given account
-      description: Returns the list of transactions of the given account.
-      parameters:
-        #path
-        - $ref: "#/components/parameters/bank-id"
-        - $ref: "#/components/parameters/account-id"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        - $ref: "#/components/parameters/X-Psu-Authentication-Required"
-        - $ref: "#/components/parameters/Fintech-Redirect-URL-OK"
-        - $ref: "#/components/parameters/Fintech-Redirect-URL-NOK"
-        - $ref: "#/components/parameters/LoTRetrievalInformation"
-        - $ref: "#/components/parameters/X-Create-Consent-If-None"
-        #query
-        - $ref: "#/components/parameters/dateFrom"
-        - $ref: "#/components/parameters/dateTo"
-        - $ref: "#/components/parameters/entryReferenceFrom"
-        - $ref: "#/components/parameters/bookingStatus"
-        - $ref: "#/components/parameters/deltaList"
-        - $ref: "#/components/parameters/online"
-
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          $ref: "#/components/responses/200_AccountsTransactions"
-        "202":
-          $ref: "#/components/responses/202_ToConsentAuthApi"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
         "404":
@@ -363,7 +126,6 @@ paths:
         - $ref: "#/components/parameters/redirectCode"
         #header
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
       security:
         - redirectCookie: []
       responses:
@@ -385,8 +147,6 @@ paths:
         #path
         - $ref: "#/components/parameters/bank-id"
         - $ref: "#/components/parameters/account-id"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
 
       responses:
         "200":
@@ -427,52 +187,6 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-  /v1/ais/banks/{bank-id}/consents:
-    delete:
-      tags:
-        - FinTechAccountInformation
-      operationId: aisConsentsDELETE
-      summary: Deletes all consents that are associated with bank
-      description: Deletes all consents that are associated with bank
-      parameters:
-        #path
-        - $ref: "#/components/parameters/bank-id"
-
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-
-      security:
-        - sessionCookie: [ ]
-      responses:
-        "200":
-          $ref: "#/components/responses/200_ConsentRemovalResult"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
-
-  /v1/consent/{userid}/{password}:
-    get:
-      summary: ask for existing consent of user
-      description: This method is disabled by default. It can be enabled by profile "CONSENT_RETRIEVAL"
-      operationId: retrieveConsent
-      tags:
-        - FintechRetrieveConsent
-      parameters:
-        #path
-        - name: userid
-          in: path
-          schema:
-            type: string
-        - name: password
-          in: path
-          schema:
-            type: string
-
-      responses:
-        "200":
-          $ref: "#/components/responses/200_ConsentRetrievalResult"
 
 components:
   securitySchemes:
@@ -684,15 +398,6 @@ components:
         type: boolean
         default: "false"
 
-    X-XSRF-TOKEN:
-      name: X-XSRF-TOKEN
-      in: header
-      required: true
-      description: |
-        XSRF parameter used to validate a SessionCookie or RedirectCookie.
-      example: faadsf93nlas32wx
-      schema:
-        type: string
 
     auth-id:
       name: auth-id
