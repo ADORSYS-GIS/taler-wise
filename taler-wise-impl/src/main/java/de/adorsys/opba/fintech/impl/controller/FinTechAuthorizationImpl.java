@@ -25,7 +25,7 @@ public class FinTechAuthorizationImpl implements FinTechAuthorizationApi {
     private final PaymentRepository paymentRepository;
 
     @Override
-    public ResponseEntity<Void> fromPaymentGET(String authId, String okOrNotokString, String finTechRedirectCode, UUID xRequestID, String xsrfToken) {
+    public ResponseEntity<Void> fromPaymentGET(String authId, String okOrNotokString, String finTechRedirectCode, UUID xRequestID) {
         OkOrNotOk okOrNotOk = OkOrNotOk.valueOf(okOrNotokString);
 
         if (okOrNotOk.equals(OkOrNotOk.OK) && consentService.confirmPayment(authId, xRequestID)) {

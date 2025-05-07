@@ -23,6 +23,48 @@ tags:
   - name: FinTechBankSearch
     description: Example bank search funtionality fro the perspective of a FinTech.
 paths:
+
+  /v1/login/oauth2:
+    get:
+      tags:
+        - FinTechAuthorization
+      operationId: callbackGetLogin
+      summary: Oauth2 callback to identify user.
+      description: |
+        Oauth2 callback to authenticate user using some Oauth2 identity provider account. Provider id is set inside state.
+      parameters:
+        #query
+        - name: code
+          in: query
+          required: true
+          description: OAuth2 redirect code
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: OAuth2 redirect state
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: true
+          description: OAuth2 requested scope
+          schema:
+            type: string
+        - name: error
+          in: query
+          required: false
+          description: OAuth2 error
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/200_UserProfile"
+        "401":
+          $ref: "#/components/responses/401_Unauthorized"
+
+
   /v1/search/bankSearch:
     get:
       tags:
@@ -33,6 +75,7 @@ paths:
       parameters:
         #headers
         - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/X-XSRF-TOKEN"
         #query
         - name: keyword
           in: query
@@ -67,6 +110,7 @@ paths:
       parameters:
         #header
         - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/X-XSRF-TOKEN"
         - name: bankProfileId
           in: query
           description: Identifier of the bank to be loaded.
@@ -99,7 +143,6 @@ paths:
         - $ref: "#/components/parameters/redirectCode"
         #header
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
       security:
         - redirectCookie: []
       responses:
@@ -147,6 +190,8 @@ paths:
         #path
         - $ref: "#/components/parameters/bank-id"
         - $ref: "#/components/parameters/account-id"
+        #header
+        - $ref: "#/components/parameters/X-Request-ID"
 
       responses:
         "200":
@@ -398,6 +443,15 @@ components:
         type: boolean
         default: "false"
 
+    X-XSRF-TOKEN:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      description: |
+        XSRF parameter used to validate a SessionCookie or RedirectCookie.
+      example: faadsf93nlas32wx
+      schema:
+        type: string
 
     auth-id:
       name: auth-id
@@ -1765,6 +1819,8 @@ components:
       title: AccountBalance
       type: object
       properties:
+        balanceAmount:
+          $ref: "#/components/schemas/Amount"
         balanceType:
           type: string
         iban:
