@@ -8,14 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,11 +20,9 @@ import java.util.UUID;
 @Slf4j
 @NoArgsConstructor
 public class ConsentEntity {
-    public ConsentEntity(ConsentType consentType, UserEntity userEntity, String bankId, String accountId, String tppAuthId, UUID tppServiceSessionId) {
+    public ConsentEntity(ConsentType consentType, String bankId, String accountId, String tppAuthId) {
         this.consentType = consentType;
-        this.userEntity = userEntity;
         this.consentConfirmed = false;
-        this.tppServiceSessionId = tppServiceSessionId;
         this.tppAuthId = tppAuthId;
         this.bankId = bankId;
         this.accountId = accountId;
@@ -42,14 +37,11 @@ public class ConsentEntity {
     private String bankId;
     private String accountId;
     private String tppAuthId;
-    private UUID tppServiceSessionId;
     private ConsentType consentType;
     @Column(nullable = false)
     private OffsetDateTime creationTime;
 
     @Column(nullable = false)
     private Boolean consentConfirmed;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserEntity userEntity;
 
 }

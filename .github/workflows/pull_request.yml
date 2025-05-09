@@ -1,0 +1,52 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [opened, synchronize, labeled, unlabeled]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: ADORSYS-GIS/taler-wise
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: '3.6.3'
+
+      - name: Checkout open-banking-gateway code
+        uses: actions/checkout@v4
+        with:
+          repository: 'adorsys/open-banking-gateway'
+          ref: 'v1.0.1'
+          path: open-banking-gateway
+
+      - name: Install open-banking-gateway locally
+        run: |
+          cd open-banking-gateway
+          mvn clean install -DskipTests
+
+      - name: Build taler-wise
+        run: |
+          cd ADORSYS-GIS/taler-wise
+          mvn clean package # Construit votre projet taler-wise
+
+      - name: Run tests for taler-wise
+        run: |
+          cd ADORSYS-GIS/taler-wise
+          mvn test
+
+      - name: Simple status check
+        run: echo "Pull request checks completed."

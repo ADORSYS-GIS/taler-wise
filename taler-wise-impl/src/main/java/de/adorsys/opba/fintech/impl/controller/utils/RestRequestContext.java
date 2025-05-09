@@ -1,6 +1,5 @@
 package de.adorsys.opba.fintech.impl.controller.utils;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +13,5 @@ import lombok.ToString;
 @ToString
 public class RestRequestContext {
     String uri;
-    String sessionCookieValue;
-    String oauth2StateCookieValue;
-    String redirectCookieValue;
-    String xsrfTokenHeaderField;
     String requestId;
 }

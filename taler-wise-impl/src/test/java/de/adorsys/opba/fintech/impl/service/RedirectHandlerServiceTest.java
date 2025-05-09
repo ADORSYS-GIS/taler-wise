@@ -56,8 +56,6 @@ class RedirectHandlerServiceTest {
     @Mock
     private RedirectUrlRepository redirectUrlRepository;
 
-    @Mock
-    private SessionLogicService sessionLogicService;
 
     private RedirectHandlerService redirectHandlerService;
 
@@ -66,7 +64,7 @@ class RedirectHandlerServiceTest {
         MockitoAnnotations.initMocks(this);
         log.info("setup RestRequestContext");
         restRequestContext.setRequestId(UUID.randomUUID().toString());
-        redirectHandlerService = new RedirectHandlerService(uiConfig, redirectUrlRepository, sessionLogicService);
+        redirectHandlerService = new RedirectHandlerService(uiConfig, redirectUrlRepository);
     }
 
     @Test
@@ -87,14 +85,12 @@ class RedirectHandlerServiceTest {
     @Test
     void doRedirect_success() {
         // given
-        when(sessionLogicService.finishRedirect()).thenReturn(new HttpHeaders());
         when(redirectUrlRepository.findByRedirectCode(REDIRECT_CODE_VALUE)).thenReturn(Optional.of(REDIRECT_URLS_ENTITY));
 
         // when
         ResponseEntity responseEntity = redirectHandlerService.doRedirect(AUTH_ID_VALUE, REDIRECT_CODE_VALUE, OkOrNotOk.OK);
 
         // then
-        verify(sessionLogicService, times(1)).finishRedirect();
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
         assertThat(responseEntity.getHeaders().size()).isEqualTo(1);
@@ -106,13 +102,11 @@ class RedirectHandlerServiceTest {
     void doRedirect_redirectCodeIsEmpty() {
         // given
         when(uiConfig.getUnauthorizedUrl()).thenReturn(UNAUTH_URL);
-        when(sessionLogicService.finishRedirect()).thenReturn(new HttpHeaders());
 
         // when
         ResponseEntity responseEntity = redirectHandlerService.doRedirect(AUTH_ID_VALUE, REDIRECT_CODE_VALUE, OkOrNotOk.OK);
 
         // then
-        verify(sessionLogicService).finishRedirect();
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(SEE_OTHER);
         assertThat(responseEntity.getHeaders().get(LOCATION_HEADER)).isEqualTo(singletonList(UNAUTH_URL));
@@ -123,13 +117,11 @@ class RedirectHandlerServiceTest {
     void doRedirect_notOk() {
         // given
         when(uiConfig.getUnauthorizedUrl()).thenReturn(UNAUTH_URL);
-        when(sessionLogicService.finishRedirect()).thenReturn(new HttpHeaders());
 
         // when
         ResponseEntity responseEntity = redirectHandlerService.doRedirect(null, REDIRECT_CODE_VALUE, OkOrNotOk.NOT_OK);
 
         // then
-        verify(sessionLogicService).finishRedirect();
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(SEE_OTHER);
         assertThat(responseEntity.getHeaders().size()).isEqualTo(1);
@@ -142,7 +134,6 @@ class RedirectHandlerServiceTest {
     void doRedirect_redirectCodeIsWrong() {
         // given
         when(uiConfig.getUnauthorizedUrl()).thenReturn(UNAUTH_URL);
-        when(sessionLogicService.finishRedirect()).thenReturn(new HttpHeaders());
         when(redirectUrlRepository.findByRedirectCode(REDIRECT_CODE_VALUE)).thenReturn(Optional.empty());
 
         // when

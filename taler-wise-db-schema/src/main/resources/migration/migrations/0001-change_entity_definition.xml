@@ -1,0 +1,26 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="1746023110827-1" author="said-ndoum (generated)">
+
+        <dropAllForeignKeyConstraints baseTableName="opb_user_entity" />
+    </changeSet>
+    <changeSet author="said-ndoum" id="20250428-01">
+        <dropForeignKeyConstraint
+                baseTableName="opb_consent_entity"
+                constraintName="fkm3ph6cod3jnj5c348wirh5urp"/>
+    </changeSet>
+
+    <changeSet author="said-ndoum" id="20250428-02">
+        <dropAllForeignKeyConstraints
+                baseTableName="opb_payment_entity"
+                />
+    </changeSet>
+    <changeSet id="1746022549147-1" author="said-ndoum (generated)">
+        <dropTable tableName="opb_session_entity"/>
+    </changeSet>
+    <changeSet id="1746022784494-1" author="said-ndoum (generated)">
+        <dropTable tableName="opb_oauth_session_entity"/>
+    </changeSet>
+</databaseChangeLog>
