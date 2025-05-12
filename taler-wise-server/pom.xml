@@ -8,8 +8,8 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>fintech-server</artifactId>
-    <name>fintech-examples/fintech-server</name>
+    <artifactId>taler-wise-server</artifactId>
+    <name>taler-wise-server</name>
 
     <properties>
       <!-- Hard reference to root directory. Used to reference pmd and checkstyle files from root.
@@ -21,13 +21,13 @@
         <!-- project dependencies -->
         <dependency>
             <groupId>de.adorsys.opba</groupId>
-            <artifactId>fintech-impl</artifactId>
+            <artifactId>taler-wise-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>de.adorsys.opba</groupId>
-            <artifactId>fintech-db-schema</artifactId>
+            <artifactId>taler-wise-db-schema</artifactId>
             <version>${project.version}</version>
         </dependency>
 

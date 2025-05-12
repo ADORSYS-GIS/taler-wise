@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- BDD Tests for fintech-example  -->
-    <artifactId>fintech-example-tests</artifactId>
+    <artifactId>taler-wise-example-tests</artifactId>
 
     <properties>
         <!-- Hard reference to root directory. Used to reference pmd and checkstyle files from root.
