@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.opba.fintech.api.model.generated.SinglePaymentInitiationRequest;
 import de.adorsys.opba.fintech.impl.config.EnableFinTechImplConfig;
 import de.adorsys.opba.fintech.impl.controller.utils.RestRequestContext;
+import de.adorsys.opba.fintech.impl.properties.CreditorProperties;
 import de.adorsys.opba.fintech.impl.service.PaymentService;
 import de.adorsys.opba.fintech.server.config.TestConfig;
 import lombok.SneakyThrows;
@@ -25,14 +26,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TestConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EnableFinTechImplConfig
 @AutoConfigureMockMvc
 public class FintechPisApiTest extends FinTechApiBaseTest {
@@ -45,12 +47,16 @@ public class FintechPisApiTest extends FinTechApiBaseTest {
     @MockBean
     private PaymentService paymentService;
 
+    @MockBean
+    private CreditorProperties creditorProperties;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
     }
 
     @AfterEach
@@ -60,44 +66,52 @@ public class FintechPisApiTest extends FinTechApiBaseTest {
     @Autowired
     protected MockMvc mvc;
 
+   @Test
+  public void SetCreditorPorperites (){
+       CreditorProperties props = new CreditorProperties();
+       props.setName("Demo Creditor");
+       props.setIban("DE89370400440532013000");
+
+       assertThat(props.getName()).isEqualTo("Demo Creditor");
+       assertThat(props.getIban()).isEqualTo("DE89370400440532013000");
+ }
+
     @Test
     @SneakyThrows
-    public void paymentInitiation() {
-
+    public void shouldInitiatePaymentWithConfiguredCreditor() {
+        // Given
         String bankUUID = "aa750320-2958-455e-9926-e9fca5ddfa92";
         String accountId = "DE38760700240320465700";
         UUID xRequestID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         String fintechRedirectURLOK = "https://fintech.com/ok";
         String fintechRedirectURLNOK = "https://fintech.com/notok";
-        boolean xPisPsuAuthenticationRequired = true;
-        boolean fintechDecoupledPreferred = false;
-        String fintechBrandLoggingInformation = "FintechBrand";
-        String fintechNotificationURI = "https://fintech.com/notify";
-        String fintechRedirectNotificationContentPreferred = "PREFERRED";
 
+        // Set creditor configuration
+        when(creditorProperties.getName()).thenReturn("Configured Creditor");
+        when(creditorProperties.getIban()).thenReturn("DE99999999999999999999");
 
         SinglePaymentInitiationRequest requestBody = new SinglePaymentInitiationRequest();
-        requestBody.setAmount("100.00");
-        requestBody.setDebitorIban("DE89370400440532013000");
-        requestBody.setCreditorIban("DE89370400440532013000");
-        requestBody.setPurpose("Payment for Order #123");
-        requestBody.setName("string");
-        requestBody.setInstantPayment(true);
-        requestBody.setEndToEndIdentification("string");
+        requestBody.setAmount("200.00");
+        requestBody.setDebitorIban("DE12345678901234567890");
+        requestBody.setCreditorIban(creditorProperties.getIban());
+        requestBody.setName(creditorProperties.getName());
+        requestBody.setSubject("Test configured creditor");
 
-        when(paymentService.initiateSinglePayment(
-                eq(bankUUID),
-                eq(accountId),
-                any(SinglePaymentInitiationRequest.class),
-                eq(fintechRedirectURLOK),
-                eq(fintechRedirectURLNOK),
-                eq(xPisPsuAuthenticationRequired),
-                eq(fintechDecoupledPreferred),
-                eq(fintechBrandLoggingInformation),
-                eq(fintechNotificationURI),
-                eq(fintechRedirectNotificationContentPreferred)
-        )).thenReturn(ResponseEntity.ok().build());
-
+        doReturn(ResponseEntity.accepted().build())
+                .when(paymentService)
+                .initiateSinglePayment(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        anyBoolean(),
+                        anyBoolean(),
+                        any(),
+                        any(),
+                        any()
+                );
+        // When
         var result = mvc.perform(post(FINTECH_PAYMENT_INITIATION_URL, bankUUID, accountId)
                         .header("X-Request-ID", xRequestID.toString())
                         .header("Fintech-Redirect-URL-OK", fintechRedirectURLOK)
@@ -107,9 +121,10 @@ public class FintechPisApiTest extends FinTechApiBaseTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+
+        // Then
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
     }
-
 
 
 }

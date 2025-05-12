@@ -8,8 +8,8 @@
     <version>1.0.1</version>
   </parent>
 
-  <artifactId>fintech-api</artifactId>
-  <name>taler-wise/fintech-api</name>
+  <artifactId>taler-wise-api</artifactId>
+  <name>taler-wise-api</name>
 
   <properties>
     <!-- Hard reference to root directory. Used to reference pmd and checkstyle files from root.

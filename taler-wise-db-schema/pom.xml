@@ -24,6 +24,6 @@
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fintech-db-schema</artifactId>
+    <artifactId>taler-wise-db-schema</artifactId>
 
 </project>

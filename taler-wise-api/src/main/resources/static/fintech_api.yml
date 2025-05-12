@@ -220,12 +220,17 @@ paths:
         - $ref: "#/components/parameters/Fintech-Redirect-Notification-Content-Preferred"
 
       requestBody:
+        required: true
         description: Single payment initiation request
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/singlePaymentInitiationRequest"
-        required: true
+            example:
+             name: string
+             debtoriban: DE38760700240320465700
+             amount: 12
+             subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
       responses:
         "202":
           $ref: "#/components/responses/202_ToConsentAuthApi"
@@ -885,9 +890,9 @@ components:
       type: object
       required:
         - name
-        - creditorIban
         - debitorIban
         - amount
+        - subject
       properties:
         name:
           type: string
@@ -897,7 +902,7 @@ components:
           type: string
         amount:
           type: string
-        purpose:
+        subject:
           type: string
         endToEndIdentification:
           type: string
