@@ -13,7 +13,6 @@ public class FintechStagesUtils {
     public static final String SESSION_COOKIE = "sessionCookie";
     public static final String ACCOUNT = "/account";
     public static final String TRANSACTION = "/accounts";
-    public static final String BANKSEARCH_LOGIN = "/login";
     public static final String ADORSYS_XS2A = "adorsys xs2a";
     public static final String REDIRECT_MODE = "redirect";
     public static final String EMBEDDED_MODE = "embedded";
