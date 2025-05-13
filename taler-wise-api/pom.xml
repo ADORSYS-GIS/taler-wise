@@ -5,7 +5,7 @@
   <parent>
     <groupId>de.adorsys.opba</groupId>
     <artifactId>taler-wise</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>fintech-api</artifactId>
@@ -61,6 +61,14 @@
       <groupId>org.openapitools</groupId>
       <artifactId>jackson-databind-nullable</artifactId>
     </dependency>
+
+    <!-- Other dependencies -->
+    <dependency>
+      <groupId>org.iban4j</groupId>
+      <artifactId>iban4j</artifactId>
+      <version>${iban4j.version}</version>
+    </dependency>
+
   </dependencies>
   
 

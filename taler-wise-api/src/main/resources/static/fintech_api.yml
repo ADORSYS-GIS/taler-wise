@@ -20,8 +20,6 @@ externalDocs:
 tags:
   - name: FinTechAuthorization
     description: Example Financial web service provided by the FinTech.
-  - name: FinTechBankSearch
-    description: Example bank search funtionality fro the perspective of a FinTech.
 paths:
 
   /v1/login/oauth2:
@@ -64,68 +62,34 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-
-  /v1/search/bankSearch:
-    get:
-      tags:
-        - FinTechBankSearch
-      operationId: bankSearchGET
-      summary: Issues an incremental bank search request to the FinTechApi.
-      description: Issues an incremental bank search request to the FinTechApi.
-      parameters:
-        #headers
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        #query
-        - name: keyword
-          in: query
-          required: true
+  /v1/bankInfo:
+  post:
+    tags:
+      - FinTechAuthorization
+    operationId: getBankInfoByIban
+    summary: Retrieve bank information by IBAN
+    description: |
+      Accepts an IBAN and returns the corresponding bank name, BIC,
+      country code, bank code, and branch code.
+    requestBody:
+      required: true
+      content:
+        application/json:
           schema:
-            type: string
-        - name: start
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: max
-          in: query
-          required: false
-          schema:
-            type: integer
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          $ref: "#/components/responses/200_BankSearchResult"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/search/bankProfile:
-    get:
-      tags:
-        - FinTechBankSearch
-      summary: Request the profile of the bank identified with id (bankProfileId).
-      description: Request the profile of the bank identified with id (bankProfileId).
-      operationId: bankProfileGET
-      parameters:
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        - name: bankProfileId
-          in: query
-          description: Identifier of the bank to be loaded.
-          required: true
-          schema:
-            type: string
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          $ref: "#/components/responses/200_BankProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
+            type: object
+            properties:
+              iban:
+                type: string
+                example: DE80760700240271232400
+            required:
+              - iban
+    responses:
+      "200":
+        $ref: '#/components/schemas/BankInfoResponse'
+      "400":
+        $ref: '#/components/responses/400_BadRequest'
+      "404":
+        $ref: '#/components/responses/404_NotFound'
 
   /v1/{auth-id}/fromConsent/{ok-or-notok}:
     get:
@@ -617,50 +581,27 @@ components:
             properties:
               userProfile:
                 $ref: "#/components/schemas/userProfile"
-
-    200_BankSearchResult:
-      description: The result of a bank search.
-      headers:
-        X-Request-ID:
-          $ref: "#/components/headers/X-Request-ID"
-        Set-Cookie:
-          $ref: "#/components/headers/Set-SessionCookie"
-        X-XSRF-TOKEN:
-          $ref: "#/components/headers/X-XSRF-TOKEN"
+    
+    200_BankInfoResponse:
+      description: Bank information retrieved successfully
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              bankDescriptor:
-                type: array
-                items:
-                  $ref: "#/components/schemas/bankDescriptor"
-              keyword:
-                type: string
-              start:
-                type: integer
-              max:
-                type: integer
-              total:
-                type: integer
+            $ref: '#/components/schemas/BankInfoResponse'
 
-    200_BankProfile:
-      description: Response containing the service profile of a bank.
-      headers:
-        X-Request-ID:
-          $ref: "#/components/headers/X-Request-ID"
-        Set-Cookie:
-          $ref: "#/components/headers/Set-SessionCookie"
-        X-XSRF-TOKEN:
-          $ref: "#/components/headers/X-XSRF-TOKEN"
+    400_BadRequest:
+      description: Invalid IBAN supplied
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              bankProfile:
-                $ref: "#/components/schemas/bankProfile"
+            $ref: '#/components/schemas/ErrorResponse'
+            
+    404_NotFound:
+      description: Bank information not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
     200_AccountList:
       description: Response containing the list of bank accounts.
@@ -926,53 +867,29 @@ components:
           type: string
           format: date-time
 
-    # Search and bank profile
-    bankDescriptor:
-      title: Bank Descriptor
+    BankInfoResponse:
       type: object
       properties:
-        bankName:
+        countryCode:
           type: string
-        bic:
-          type: string
+          description: ISO 3166-1 alpha-2 country code
         bankCode:
           type: string
-        uuid:
+          description: National bank identifier extracted from IBAN
+        branchCode:
           type: string
-          format: uuid
-        profiles:
-          type: array
-          items:
-            $ref: "#/components/schemas/bankProfile"
-
-    bankProfile:
-      title: Bank Profile
-      type: object
-      properties:
-        bankId:
-          type: string
+          description: Branch identifier (if any)
         bankName:
           type: string
-        name:
-          type: string
+          description: Official bank name
         bic:
           type: string
-        uuid:
-          type: string
-          format: uuid
-        services:
-          type: array
-          items:
-            # can be an enum
-            type: string
-        externalId:
-          type: string
-        externalInterfaces:
-          type: string
-        protocolType:
-          type: string
-        isSandbox:
-          type: boolean
+          description: Bank Identifier Code (SWIFT/BIC)
+      required:
+        - countryCode
+        - bankCode
+        - bankName
+        - bic
 
     # Account and transaction information
     accountDetails:
