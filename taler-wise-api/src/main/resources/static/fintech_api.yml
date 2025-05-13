@@ -63,33 +63,33 @@ paths:
           $ref: "#/components/responses/401_Unauthorized"
 
   /v1/bankInfo:
-  post:
-    tags:
-      - FinTechAuthorization
-    operationId: getBankInfoByIban
-    summary: Retrieve bank information by IBAN
-    description: |
-      Accepts an IBAN and returns the corresponding bank name, BIC,
-      country code, bank code, and branch code.
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              iban:
-                type: string
-                example: DE80760700240271232400
-            required:
-              - iban
-    responses:
-      "200":
-        $ref: '#/components/schemas/BankInfoResponse'
-      "400":
-        $ref: '#/components/responses/400_BadRequest'
-      "404":
-        $ref: '#/components/responses/404_NotFound'
+    post:
+      tags:
+        - FinTechAuthorization
+      operationId: getBankInfoByIban
+      summary: Retrieve bank information by IBAN
+      description: |
+        Accepts an IBAN and returns the corresponding bank name, BIC,
+        country code, bank code, and branch code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iban:
+                  type: string
+                  example: DE80760700240271232400
+              required:
+                - iban
+      responses:
+        "200":
+          $ref: '#/components/schemas/BankInfoResponse'
+        "400":
+          $ref: '#/components/responses/400_BadRequest'
+        "404":
+          $ref: '#/components/responses/404_NotFound'
 
   /v1/{auth-id}/fromConsent/{ok-or-notok}:
     get:
