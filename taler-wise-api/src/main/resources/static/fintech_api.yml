@@ -85,7 +85,11 @@ paths:
                 - iban
       responses:
         "200":
-          $ref: '#/components/schemas/BankInfoResponse'
+          description: "Bank information successfully retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankInfoResponse'
         "400":
           $ref: '#/components/responses/400_BadRequest'
         "404":
