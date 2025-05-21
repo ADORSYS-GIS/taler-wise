@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.opba</groupId>
         <artifactId>taler-wise</artifactId>
-        <version>1.0.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>taler-wise-server</artifactId>
