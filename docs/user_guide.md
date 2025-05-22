@@ -104,8 +104,12 @@ adorsys-sandbox-oauth-server-url: https://xs2a-online-modelbank.support.sol.ador
 ### Start Openbanking Gateway Server
 
 ```bash
-cd opba-embedded-starter
+cd open-banking-gateway
 mvn clean install
+```
+
+```bash
+cd opba-embedded-starter
 mvn spring-boot:run
 ```
 The server will start on port 8085.
@@ -128,9 +132,13 @@ The Consent UI will start on port 4200.
 Navigate to http://localhost:4200 in your browser (this UI is used to managed informations after a payment so right now if you want to check if it is up in the browser you will have a blue empty screen and it is normal.)
 
 ### 3. Start Taler Wise Server
+
 ```bash
-cd taler-wise/taler-wise-server
+cd taler-wise 
 mvn clean install
+```
+```bash
+cd taler-wise-server
 mvn spring-boot:run
 ```
 The Taler Wise server will start on port 8086.
