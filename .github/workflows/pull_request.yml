@@ -25,12 +25,20 @@ jobs:
         uses: stCarolas/setup-maven@v4
         with:
           maven-version: '3.6.3'
+      - name: Cache Maven local repository
+        uses: actions/cache@v4
+        with:
+         path: ~/.m2/repository
+         key: maven-repo-open-banking-gateway-${{ hashFiles('open-banking-gateway/pom.xml') }}
+         restore-keys: |
+          maven-repo-open-banking-gateway-
+
 
       - name: Checkout open-banking-gateway code
         uses: actions/checkout@v4
         with:
           repository: 'adorsys/open-banking-gateway'
-          ref: 'v1.0.1'
+          ref: 'develop'
           path: open-banking-gateway
 
       - name: Install open-banking-gateway locally
