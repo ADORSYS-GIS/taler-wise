@@ -174,22 +174,22 @@ INFO: Authorization URL: :http://localhost:4200/auth/pis/c866f1b0-8d12-4d6f-a455
 
 ### 3. Complete Authorization Flow
 
-#### 1. Access Consent UI: Click the authorization link from the logs
-#### 2. Create User (if you don't have yet)
-#### 3. Enter PSU ID: Use max.musterman (our test user)
-#### 4. Confirm Payment: Click "Confirm" to proceed to bank authentication
+#### - Access Consent UI: Click the authorization link from the logs
+#### - Create User (if you don't have yet)
+#### - Enter PSU ID: Use max.musterman (our test user)
+#### - Confirm Payment: Click "Confirm" to proceed to bank authentication
 
 ### 4.  Bank Authentication (Strong Customer Authentication)
 
-#### 1. Login to mock bank
+#### - Login to mock bank
     - Login: max.musterman
     - Password: 12345
 
-#### 2. Review Payment Details: Verify the payment information and click "Next"
-#### 3. Select SCA method: Choose "Send Code" for SMS authentication
-#### 4. Enter SCA Code: Use the test code ``123456``
-#### 5. Complete Authentication: Follow the final confirmation steps
-#### 6. Verify the payment: You can login in our online banking as max.musterman with the same credentials and check his last payment using this link ``https://xs2a-online-modelbank.support.sol.adorsys.com/login``
+#### - Review Payment Details: Verify the payment information and click "Next"
+#### - Select SCA method: Choose "Send Code" for SMS authentication
+#### - Enter SCA Code: Use the test code ``123456``
+#### - Complete Authentication: Follow the final confirmation steps
+#### - Verify the payment: You can login in our online banking as max.musterman with the same credentials and check his last payment using this link ``https://xs2a-online-modelbank.support.sol.adorsys.com/login``
 
 ## Troubleshooting
 Important note: Always check the directory where you are during the process
