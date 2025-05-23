@@ -74,12 +74,12 @@ Navigate to the OpenBanking Gateway directory and start the database:
 
 ```bash
 cd open-banking-gateway
-docker-compose up -d postgres
+docker compose up -d postgres
 ```
 
 Verify Database is Running:
 ```bash
-docker-compose ps postgres
+docker compose ps postgres
 # Should show postgres container as "Up"
 ```
 ## ⚙️ Service Configuration
@@ -91,7 +91,7 @@ In a test situation to achieve what we need to do the OBG project will work with
 ### Modify configuration file
 Navigate to the configuration file:
 ```bash
-cd open-banking-gateway/opba-embedded-starter/src/main/resources/
+cd opba-embedded-starter/src/main/resources/
 ```
 Open ``application.yml`` and update the sandbox URLs section:
 
@@ -104,8 +104,8 @@ adorsys-sandbox-oauth-server-url: https://xs2a-online-modelbank.support.sol.ador
 ### Start Openbanking Gateway Server
 
 ```bash
-cd open-banking-gateway
-mvn clean install
+cd path-to-the-root-of-opba-project # here you are suppose to go to the root directory
+mvn clean install -DskipTests
 ```
 
 ```bash
@@ -135,7 +135,7 @@ Navigate to http://localhost:4200 in your browser (this UI is used to managed in
 
 ```bash
 cd taler-wise 
-mvn clean install
+mvn clean install -DskipTests
 ```
 ```bash
 cd taler-wise-server
@@ -190,6 +190,9 @@ INFO: Authorization URL: :http://localhost:4200/auth/pis/c866f1b0-8d12-4d6f-a455
 #### 4. Enter SCA Code: Use the test code ``123456``
 #### 5. Complete Authentication: Follow the final confirmation steps
 #### 6. Verify the payment: You can login in our online banking as max.musterman with the same credentials and check his last payment using this link ``https://xs2a-online-modelbank.support.sol.adorsys.com/login``
+
+## Troubleshooting
+Important note: Always check the directory where you are during the process
 
 ## 🆘 Support
 
