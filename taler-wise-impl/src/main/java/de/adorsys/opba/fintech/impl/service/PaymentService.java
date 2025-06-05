@@ -54,7 +54,7 @@ public class PaymentService {
     private final CreditorProperties creditorProperties;
 
     public ResponseEntity<Void> initiateSinglePayment(String bankProfileId, String accountId, SinglePaymentInitiationRequest singlePaymentInitiationRequest,
-                                                      String fintechOkUrl, String fintechNOkUrl, Boolean xPisPsuAuthenticationRequired, Boolean fintechDecoupledPreferred,
+                                                      String fintechOkUrl, String fintechNOkUrl, Boolean fintechDecoupledPreferred,
                                                       String fintechBrandLoggingInformation, String fintechNotificationURI, String fintechRedirectNotificationContentPreferred) {
         log.info("fill paramemeters for payment");
         final String fintechRedirectCode = UUID.randomUUID().toString();
@@ -81,7 +81,7 @@ public class PaymentService {
                 null,
                 tppProperties.getFintechDataProtectionPassword(),
                 UUID.fromString(bankProfileId),
-                xPisPsuAuthenticationRequired,
+                false,
                 null,
                 HEADER_COMPUTE_PSU_IP_ADDRESS,
                 null,

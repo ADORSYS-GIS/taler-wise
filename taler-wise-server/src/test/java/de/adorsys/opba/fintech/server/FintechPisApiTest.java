@@ -106,7 +106,6 @@ public class FintechPisApiTest extends FinTechApiBaseTest {
                         any(),
                         any(),
                         anyBoolean(),
-                        anyBoolean(),
                         any(),
                         any(),
                         any()
