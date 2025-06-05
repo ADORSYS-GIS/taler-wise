@@ -24,7 +24,6 @@ public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentI
             String bankId,
             String accountId,
             SinglePaymentInitiationRequest body,
-            Boolean xPisPsuAuthenticationRequired,
             Boolean fintechDecoupledPreferred,
             String fintechBrandLoggingInformation,
             String fintechNotificationURI,
@@ -32,7 +31,7 @@ public class FintechSinglePaymentInitiationImpl implements FintechSinglePaymentI
         log.debug("got initiate payment request");
 
         return paymentService.initiateSinglePayment(bankId, accountId, body,
-                        fintechRedirectURLOK, fintechRedirectURLNOK, xPisPsuAuthenticationRequired,
+                        fintechRedirectURLOK, fintechRedirectURLNOK,
                         fintechDecoupledPreferred, fintechBrandLoggingInformation, fintechNotificationURI,
                         fintechRedirectNotificationContentPreferred);
     }
