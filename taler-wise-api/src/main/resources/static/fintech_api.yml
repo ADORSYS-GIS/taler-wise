@@ -21,7 +21,6 @@ tags:
   - name: FinTechAuthorization
     description: Example Financial web service provided by the FinTech.
 paths:
-
   /v1/login/oauth2:
     get:
       tags:
@@ -62,38 +61,41 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-  /v1/bankInfo:
+  /v1/search/bankInfo:
     post:
       tags:
-        - FinTechAuthorization
+        - FinTechIbanSearch
       operationId: getBankInfoByIban
-      summary: Retrieve bank information by IBAN
+      summary: Retrieves bank metadata using an IBAN
       description: |
-        Accepts an IBAN and returns the corresponding bank name, BIC,
-        country code, bank code, and branch code.
+        Takes an IBAN and returns metadata such as bank name, bank code, and BIC.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - iban
               properties:
                 iban:
                   type: string
-                  example: DE80760700240271232400
-              required:
-                - iban
+                  example: "DE89370400440532013000"
+      parameters:
+        - $ref: "#/components/parameters/X-Request-ID"
       responses:
         "200":
-          description: "Bank information successfully retrieved"
+          description: Bank metadata for the given IBAN
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BankInfoResponse'
+                $ref: "#/components/schemas/InlineResponseBankInfo"
         "400":
-          $ref: '#/components/responses/400_BadRequest'
+          $ref: "#/components/responses/400_BadRequest"
+        "401":
+          $ref: "#/components/responses/401_Unauthorized"
         "404":
-          $ref: '#/components/responses/404_NotFound'
+          $ref: "#/components/responses/404_NotFound"
 
   /v1/{auth-id}/fromConsent/{ok-or-notok}:
     get:
@@ -199,7 +201,6 @@ paths:
           $ref: "#/components/responses/202_ToConsentAuthApi"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
-
 
 components:
   securitySchemes:
@@ -375,7 +376,14 @@ components:
       schema:
         type: string
         description: json representation of AisConsentRequest object
-        example: {"access":{"allPsd2":"ALL_ACCOUNTS_WITH_BALANCES"},"frequencyPerDay":4,"validUntil":"2021-06-18","recurringIndicator":true,"combinedServiceIndicator":false}
+        example:
+          {
+            "access": { "allPsd2": "ALL_ACCOUNTS_WITH_BALANCES" },
+            "frequencyPerDay": 4,
+            "validUntil": "2021-06-18",
+            "recurringIndicator": true,
+            "combinedServiceIndicator": false,
+          }
 
     X-Request-ID:
       name: X-Request-ID
@@ -585,27 +593,6 @@ components:
             properties:
               userProfile:
                 $ref: "#/components/schemas/userProfile"
-    
-    200_BankInfoResponse:
-      description: Bank information retrieved successfully
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BankInfoResponse'
-
-    400_BadRequest:
-      description: Invalid IBAN supplied
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-            
-    404_NotFound:
-      description: Bank information not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
 
     200_AccountList:
       description: Response containing the list of bank accounts.
@@ -706,7 +693,7 @@ components:
       description: |
         Access credentials absent or invalid. This happens when
         * Provided credential for login not matching.
-        * Endpoin expect a session cookie but none is present.
+        * Endpoint expect a session cookie but none is present.
         * Session cookie is present but associated stateString does not match.
 
         As a consequence, we reset existing FinTechLoginSessionState if any.
@@ -871,29 +858,19 @@ components:
           type: string
           format: date-time
 
-    BankInfoResponse:
+    InlineResponseBankInfo:
       type: object
+      required:
+        - bankName
+        - bankCode
+        - bic
       properties:
-        countryCode:
-          type: string
-          description: ISO 3166-1 alpha-2 country code
-        bankCode:
-          type: string
-          description: National bank identifier extracted from IBAN
-        branchCode:
-          type: string
-          description: Branch identifier (if any)
         bankName:
           type: string
-          description: Official bank name
+        bankCode:
+          type: string
         bic:
           type: string
-          description: Bank Identifier Code (SWIFT/BIC)
-      required:
-        - countryCode
-        - bankCode
-        - bankName
-        - bic
 
     # Account and transaction information
     accountDetails:
