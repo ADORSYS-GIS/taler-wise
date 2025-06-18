@@ -34,6 +34,11 @@ tpp:
   fintechID: MY-SUPER-FINTECH-ID
   fintechDataProtectionPassword: qwerty
 
+creditor:
+  name: Demo Creditor
+  iban: DE89370400440532013000
+
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/open_banking?currentSchema=fintech

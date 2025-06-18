@@ -8,6 +8,7 @@ import de.adorsys.opba.fintech.impl.database.entities.PaymentEntity;
 import de.adorsys.opba.fintech.impl.database.entities.RedirectUrlsEntity;
 import de.adorsys.opba.fintech.impl.database.repositories.PaymentRepository;
 import de.adorsys.opba.fintech.impl.mapper.PaymentInitiationWithStatusResponseMapper;
+import de.adorsys.opba.fintech.impl.properties.CreditorProperties;
 import de.adorsys.opba.fintech.impl.properties.TppProperties;
 import de.adorsys.opba.fintech.impl.tppclients.ConsentType;
 import de.adorsys.opba.fintech.impl.tppclients.TppPisPaymentStatusClient;
@@ -50,19 +51,21 @@ public class PaymentService {
     private final RedirectHandlerService redirectHandlerService;
     private final HandleAcceptedService handleAcceptedService;
     private final PaymentRepository paymentRepository;
+    private final CreditorProperties creditorProperties;
 
     public ResponseEntity<Void> initiateSinglePayment(String bankProfileId, String accountId, SinglePaymentInitiationRequest singlePaymentInitiationRequest,
-                                                      String fintechOkUrl, String fintechNOkUrl, Boolean xPisPsuAuthenticationRequired, Boolean fintechDecoupledPreferred,
+                                                      String fintechOkUrl, String fintechNOkUrl, Boolean fintechDecoupledPreferred,
                                                       String fintechBrandLoggingInformation, String fintechNotificationURI, String fintechRedirectNotificationContentPreferred) {
         log.info("fill paramemeters for payment");
         final String fintechRedirectCode = UUID.randomUUID().toString();
         PaymentInitiation payment = new PaymentInitiation();
-        payment.setCreditorAccount(getAccountReference(singlePaymentInitiationRequest.getCreditorIban()));
+        payment.setCreditorAccount(getAccountReference(creditorProperties.getIban()));
         payment.setDebtorAccount(getAccountReference(singlePaymentInitiationRequest.getDebitorIban()));
-        payment.setCreditorName(singlePaymentInitiationRequest.getName());
+        payment.setCreditorName(creditorProperties.getName());
         payment.setInstructedAmount(getAmountWithCurrency(singlePaymentInitiationRequest.getAmount()));
-        payment.remittanceInformationUnstructured(singlePaymentInitiationRequest.getPurpose());
+        payment.remittanceInformationUnstructured(singlePaymentInitiationRequest.getSubject());
         payment.setEndToEndIdentification(singlePaymentInitiationRequest.getEndToEndIdentification());
+        singlePaymentInitiationRequest.setInstantPayment(true);
         log.info("start call for payment {} {}", fintechOkUrl, fintechNOkUrl);
         var paymentProduct = singlePaymentInitiationRequest.isInstantPayment() ? INSTANT_SEPA_PAYMENT_PRODUCT : SEPA_PAYMENT_PRODUCT;
         ResponseEntity<PaymentInitiationResponse> responseOfTpp = tppPisSinglePaymentClient.initiatePayment(
@@ -78,7 +81,7 @@ public class PaymentService {
                 null,
                 tppProperties.getFintechDataProtectionPassword(),
                 UUID.fromString(bankProfileId),
-                xPisPsuAuthenticationRequired,
+                false,
                 null,
                 HEADER_COMPUTE_PSU_IP_ADDRESS,
                 null,

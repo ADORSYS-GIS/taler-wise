@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "6a6f801a-4d0a-40d4-a9b7-506cbd243c83",
+		"name": "Taler-wise Payment Initiation",
+		"description": "Stateless call to initiate a single payment.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25454200"
+	},
+	"item": [
+		{
+			"name": "Initiate Single Payment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "123e4567-e89b-12d3-a456-426614174000"
+					},
+					{
+						"key": "X-PIS-PSU-Authentication-Required",
+						"value": "true",
+						"disabled": true
+					},
+					{
+						"key": "Fintech-Decoupled-Preferred",
+						"value": "false",
+						"disabled": true
+					},
+					{
+						"key": "Fintech-Brand-Logging-Information",
+						"value": "taler-app",
+						"disabled": true
+					},
+					{
+						"key": "Fintech-Notification-URI",
+						"value": "https://my.fintech.app/notify",
+						"disabled": true
+					},
+					{
+						"key": "Fintech-Redirect-Notification-Content-Preferred",
+						"value": "true",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Fintech-Redirect-URL-OK",
+						"value": "https://apple.com",
+						"type": "text"
+					},
+					{
+						"key": "Fintech-Redirect-URL-NOK",
+						"value": "https://apple.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"string\",\n  \"creditorIban\": \"DE69760700240340283600\",\n  \"debitorIban\": \"DE38760700240320465700\",\n  \"amount\": \"12\",\n  \"purpose\": \"string\",\n  \"endToEndIdentification\": \"string\",\n  \"instantPayment\": true\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8087/v1/pis/banks/{{bankId}}/accounts/{{accountId}}/payments/single",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8087",
+					"path": [
+						"v1",
+						"pis",
+						"banks",
+						"{{bankId}}",
+						"accounts",
+						"{{accountId}}",
+						"payments",
+						"single"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
