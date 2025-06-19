@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 class FinTechApiBaseTest {
     private static final String BANK_PROFILE_RESPONSE_PREFIX = "TPP_BankProfileResponse";
     private static final String POSTFIX = ".json";
+    private static final String FIN_TECH_AUTH_URL = "/v1/login";
 
     @SneakyThrows
     protected String readFile(String fileName) {
@@ -44,7 +45,7 @@ class FinTechApiBaseTest {
     protected MvcResult plainAuth(MockMvc mvc, String username, String password) {
         LoginBody loginBody = new LoginBody(username, password);
         return mvc.perform(
-                        post("/v1/auth/login")
+                        post(FIN_TECH_AUTH_URL)
                                 .header(Consts.HEADER_X_REQUEST_ID, UUID.randomUUID().toString())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(GSON.toJson(loginBody))
