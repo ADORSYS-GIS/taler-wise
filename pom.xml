@@ -11,6 +11,7 @@
     <!-- Core module that implements main business logic -->
     <artifactId>taler-wise</artifactId>
     <name>taler-wise</name>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
