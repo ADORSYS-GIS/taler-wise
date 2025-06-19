@@ -68,7 +68,7 @@ paths:
       operationId: getBankInfoByIban
       summary: Retrieves bank metadata using an IBAN
       description: |
-        Takes an IBAN and returns metadata such as bank name, bank code, and BIC.
+        Takes an IBAN and returns metadata such as bank name, bank code, uuid and BIC.
       requestBody:
         required: true
         content:
@@ -868,12 +868,15 @@ components:
         - bankName
         - bankCode
         - bic
+        - uuid
       properties:
         bankName:
           type: string
         bankCode:
           type: string
         bic:
+          type: string
+        uuid:
           type: string
 
     # Account and transaction information
