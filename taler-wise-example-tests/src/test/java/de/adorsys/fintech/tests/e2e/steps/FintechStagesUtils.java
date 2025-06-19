@@ -16,6 +16,7 @@ public class FintechStagesUtils {
     public static final String ADORSYS_XS2A = "adorsys xs2a";
     public static final String REDIRECT_MODE = "redirect";
     public static final String EMBEDDED_MODE = "embedded";
+    public static final String BANKSEARCH_LOGIN = "/login";
 
 
     public static RequestSpecification withDefaultHeaders() {

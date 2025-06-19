@@ -141,7 +141,7 @@
         <jakarta.interceptor.api.version>2.2.0</jakarta.interceptor.api.version>
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress>1.26.2</commons-compress>
-        <iban4j.version>3.2.10-RELEASE</iban4j.version>
+        <iban4j.version>3.2.11-RELEASE</iban4j.version>
     </properties>
 
     <modules>

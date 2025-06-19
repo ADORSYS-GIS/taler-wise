@@ -77,7 +77,7 @@ public class UserInformationResult extends AccountInformationResult {
     public UserInformationResult fintech_navigates_back_to_login_after_user_logs_out() {
         ExtractableResponse<Response> response = withDefaultHeaders()
                                                          .when()
-                                                         .get("/v1/search/bankInfo")
+                                                         .get(BANKSEARCH_LOGIN)
                                                          .then()
                                                          .statusCode(HttpStatus.OK.value())
                                                          .extract();
