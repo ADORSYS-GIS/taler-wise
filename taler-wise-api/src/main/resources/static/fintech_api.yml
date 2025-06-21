@@ -74,14 +74,16 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - iban
-              properties:
-                iban:
-                  type: string
-                  description: International Bank Account Number to be used for the bank information lookup.
-                  example: "DE89370400440532013000"
+              $ref: "#/components/schemas/BankInfoByIbanRequest"
+            examples:
+              validIban:
+                summary: A valid IBAN example
+                value:
+                  iban: "DE89370400440532013000"
+              anotherIban:
+                summary: Another valid IBAN
+                value:
+                  iban: "FR1420041010050500013M02606"
       parameters:
         - $ref: "#/components/parameters/X-Request-ID"
       responses:
@@ -862,6 +864,19 @@ components:
         lastLogin:
           type: string
           format: date-time
+
+    BankInfoByIbanRequest:
+      type: object
+      description: |
+        Contains the International Bank Account Number (IBAN) as the sole required property.
+        Used to perform a lookup for bank details such as bank name, code, BIC, and UUID based on the provided IBAN.
+      required:
+        - iban
+      properties:
+        iban:
+          type: string
+          description: International Bank Account Number to be used for the bank information lookup.
+          example: "DE89370400440532013000"
 
     InlineResponseBankInfo:
       type: object

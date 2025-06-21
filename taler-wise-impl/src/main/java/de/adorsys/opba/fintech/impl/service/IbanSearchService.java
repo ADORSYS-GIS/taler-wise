@@ -41,21 +41,18 @@ public class IbanSearchService {
         SearchBankinfoBody body = new SearchBankinfoBody();
         body.setIban(iban);
 
-        // Get the full response first
-        try {
-            ResponseEntity<BankInfoResponse> fullResponse = tppIbanSearchClient.getBankInfoByIban(UUID.fromString(restRequestContext.getRequestId()),
-                    body,
-                    COMPUTE_FINTECH_ID,
-                    COMPUTE_X_REQUEST_SIGNATURE);
+        ResponseEntity<BankInfoResponse> fullResponse = tppIbanSearchClient.getBankInfoByIban(
+                UUID.fromString(restRequestContext.getRequestId()),
+                body,
+                COMPUTE_FINTECH_ID,
+                COMPUTE_X_REQUEST_SIGNATURE
+        );
 
-            BankInfoResponse response = fullResponse.getBody();
-            if (response == null) {
-                throw new InvalidIbanException("Unable to find bank info for the provided IBAN.");
-            }
-
-            return bankInfoMapper.mapFromTppToFintech(response);
-        } catch (Exception e) {
-            throw new InvalidIbanException("An unexpected error occurred while processing your request. Please try again later.");
+        BankInfoResponse response = fullResponse.getBody();
+        if (response == null) {
+            throw new InvalidIbanException("Unable to find bank info for the provided IBAN.");
         }
+
+        return bankInfoMapper.mapFromTppToFintech(response);
     }
 }
