@@ -1,7 +1,7 @@
 package de.adorsys.opba.fintech.impl.controller;
 
 import de.adorsys.opba.fintech.api.model.generated.InlineResponseBankInfo;
-import de.adorsys.opba.fintech.api.model.generated.SearchBankInfoBody;
+import de.adorsys.opba.fintech.api.model.generated.BankInfoByIbanRequest;
 import de.adorsys.opba.fintech.api.resource.generated.FinTechIbanSearchApi;
 import de.adorsys.opba.fintech.impl.service.IbanSearchService;
 import java.util.UUID;
@@ -20,8 +20,8 @@ public class FinTechIbanSearchImpl implements FinTechIbanSearchApi {
 
     @Override
     public ResponseEntity<InlineResponseBankInfo> getBankInfoByIban(
-        UUID xRequestID,
-        SearchBankInfoBody body
+            UUID xRequestID,
+            BankInfoByIbanRequest body
     ) {
         InlineResponseBankInfo fintechModel = ibanSearchService.searchByIban(
             body.getIban()
