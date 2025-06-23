@@ -20,10 +20,7 @@ externalDocs:
 tags:
   - name: FinTechAuthorization
     description: Example Financial web service provided by the FinTech.
-  - name: FinTechBankSearch
-    description: Example bank search funtionality fro the perspective of a FinTech.
 paths:
-
   /v1/login/oauth2:
     get:
       tags:
@@ -64,64 +61,40 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-
-  /v1/search/bankSearch:
-    get:
+  /v1/search/bankInfo:
+    post:
       tags:
-        - FinTechBankSearch
-      operationId: bankSearchGET
-      summary: Issues an incremental bank search request to the FinTechApi.
-      description: Issues an incremental bank search request to the FinTechApi.
+        - FinTechIbanSearch
+      operationId: getBankInfoByIban
+      summary: Retrieves bank metadata using an IBAN
+      description: |
+        Takes an IBAN and returns metadata such as bank name, bank code, uuid and BIC.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BankInfoByIbanRequest"
+            examples:
+              validIban:
+                summary: A valid IBAN example
+                value:
+                  iban: "DE89370400440532013000"
+              anotherIban:
+                summary: Another valid IBAN
+                value:
+                  iban: "FR1420041010050500013M02606"
       parameters:
-        #headers
         - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        #query
-        - name: keyword
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: start
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: max
-          in: query
-          required: false
-          schema:
-            type: integer
-      security:
-        - sessionCookie: []
       responses:
         "200":
-          $ref: "#/components/responses/200_BankSearchResult"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/search/bankProfile:
-    get:
-      tags:
-        - FinTechBankSearch
-      summary: Request the profile of the bank identified with id (bankProfileId).
-      description: Request the profile of the bank identified with id (bankProfileId).
-      operationId: bankProfileGET
-      parameters:
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-        - $ref: "#/components/parameters/X-XSRF-TOKEN"
-        - name: bankProfileId
-          in: query
-          description: Identifier of the bank to be loaded.
-          required: true
-          schema:
-            type: string
-      security:
-        - sessionCookie: []
-      responses:
-        "200":
-          $ref: "#/components/responses/200_BankProfile"
+          description: Bank metadata for the given IBAN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InlineResponseBankInfo"
+        "400":
+          $ref: "#/components/responses/400_BadRequest"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
         "404":
@@ -235,7 +208,6 @@ paths:
           $ref: "#/components/responses/202_ToConsentAuthApi"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
-
 
 components:
   securitySchemes:
@@ -411,7 +383,14 @@ components:
       schema:
         type: string
         description: json representation of AisConsentRequest object
-        example: {"access":{"allPsd2":"ALL_ACCOUNTS_WITH_BALANCES"},"frequencyPerDay":4,"validUntil":"2021-06-18","recurringIndicator":true,"combinedServiceIndicator":false}
+        example: |
+          {
+            "access": { "allPsd2": "ALL_ACCOUNTS_WITH_BALANCES" },
+            "frequencyPerDay": 4,
+            "validUntil": "2021-06-18",
+            "recurringIndicator": true,
+            "combinedServiceIndicator": false,
+          }
 
     X-Request-ID:
       name: X-Request-ID
@@ -622,50 +601,6 @@ components:
               userProfile:
                 $ref: "#/components/schemas/userProfile"
 
-    200_BankSearchResult:
-      description: The result of a bank search.
-      headers:
-        X-Request-ID:
-          $ref: "#/components/headers/X-Request-ID"
-        Set-Cookie:
-          $ref: "#/components/headers/Set-SessionCookie"
-        X-XSRF-TOKEN:
-          $ref: "#/components/headers/X-XSRF-TOKEN"
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              bankDescriptor:
-                type: array
-                items:
-                  $ref: "#/components/schemas/bankDescriptor"
-              keyword:
-                type: string
-              start:
-                type: integer
-              max:
-                type: integer
-              total:
-                type: integer
-
-    200_BankProfile:
-      description: Response containing the service profile of a bank.
-      headers:
-        X-Request-ID:
-          $ref: "#/components/headers/X-Request-ID"
-        Set-Cookie:
-          $ref: "#/components/headers/Set-SessionCookie"
-        X-XSRF-TOKEN:
-          $ref: "#/components/headers/X-XSRF-TOKEN"
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              bankProfile:
-                $ref: "#/components/schemas/bankProfile"
-
     200_AccountList:
       description: Response containing the list of bank accounts.
       headers:
@@ -765,7 +700,7 @@ components:
       description: |
         Access credentials absent or invalid. This happens when
         * Provided credential for login not matching.
-        * Endpoin expect a session cookie but none is present.
+        * Endpoint expect a session cookie but none is present.
         * Session cookie is present but associated stateString does not match.
 
         As a consequence, we reset existing FinTechLoginSessionState if any.
@@ -930,53 +865,42 @@ components:
           type: string
           format: date-time
 
-    # Search and bank profile
-    bankDescriptor:
-      title: Bank Descriptor
+    BankInfoByIbanRequest:
       type: object
+      description: |
+        Contains the International Bank Account Number (IBAN) as the sole required property.
+        Used to perform a lookup for bank details such as bank name, code, BIC, and UUID based on the provided IBAN.
+      required:
+        - iban
+      properties:
+        iban:
+          type: string
+          description: International Bank Account Number to be used for the bank information lookup.
+          example: "DE89370400440532013000"
+
+    InlineResponseBankInfo:
+      type: object
+      description: |
+        Contains metadata about a bank, as determined from a provided IBAN. 
+        Used to display or verify bank details in client applications.
+      required:
+        - bankName
+        - bankCode
+        - bic
+        - uuid
       properties:
         bankName:
           type: string
-        bic:
-          type: string
+          description: The full legal name of the bank as registered with financial authorities.
         bankCode:
           type: string
-        uuid:
-          type: string
-          format: uuid
-        profiles:
-          type: array
-          items:
-            $ref: "#/components/schemas/bankProfile"
-
-    bankProfile:
-      title: Bank Profile
-      type: object
-      properties:
-        bankId:
-          type: string
-        bankName:
-          type: string
-        name:
-          type: string
+          description: The national code used to identify the bank (e.g., Commerzbank in Germany).
         bic:
           type: string
+          description: The Bank Identifier Code (BIC), sometimes called SWIFT code, used for international transfers.
         uuid:
           type: string
-          format: uuid
-        services:
-          type: array
-          items:
-            # can be an enum
-            type: string
-        externalId:
-          type: string
-        externalInterfaces:
-          type: string
-        protocolType:
-          type: string
-        isSandbox:
-          type: boolean
+          description: A unique identifier assigned to this record in the system, for auditing and reference purposes.
 
     # Account and transaction information
     accountDetails:
