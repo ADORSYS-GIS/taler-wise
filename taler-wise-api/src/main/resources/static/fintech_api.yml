@@ -209,6 +209,46 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
+  /v1/pis/banks/{bank-id}/accounts/{account-id}/orchestrated/payments/single:
+    post:
+      summary: Single payment initiation request
+      description: This method is used to initiate a payment at the Fintech Server.
+      operationId: initiateOrchestratedSinglePayment
+      tags:
+        - FintechOrchestratedSinglePaymentInitiation
+      parameters:
+        #path
+        - $ref: "#/components/parameters/bank-id"
+        - $ref: "#/components/parameters/account-id"
+        #header
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/Fintech-Redirect-URL-OK"
+        - $ref: "#/components/parameters/Fintech-Redirect-URL-NOK"
+        - $ref: "#/components/parameters/Fintech-Decoupled-Preferred"
+        - $ref: "#/components/parameters/Fintech-Brand-Logging-Information"
+        - $ref: "#/components/parameters/Fintech-Notification-URI"
+        - $ref: "#/components/parameters/Fintech-Redirect-Notification-Content-Preferred"
+
+      requestBody:
+        required: true
+        description: Single payment initiation request
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/orchestratedSinglePaymentInitiationRequest"
+            example:
+              name: string
+              debtoriban: DE38760700240320465700
+              amount: 12
+              subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
+              psuId: max.musterman
+      responses:
+        "202":
+          $ref: "#/components/responses/202_To_OBA"
+        "401":
+          $ref: "#/components/responses/401_Unauthorized"
+
+
 components:
   securitySchemes:
     sessionCookie:
@@ -306,6 +346,13 @@ components:
       schema:
         type: string
         example: http://localhost:8080/finTechUi?sessionState=ejxs.wersdzxxc23r.asdf
+
+    Location-ASPSP:
+      name: Location
+      description: |
+        This is the 30X Location Header. It contains the url used to redirect PSU to the OnlineBanking of ASPSP.
+      schema:
+        type: string
 
   parameters:
     Fintech-Redirect-URL-OK:
@@ -628,6 +675,15 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/transactionsResponse"
+    202_To_OBA:
+      description:
+      headers:
+          Location:
+            $ref: "#/components/headers/Location-ASPSP"
+          X-Request-ID:
+            $ref: "#/components/headers/X-Request-ID"
+          Set-Cookie:
+            $ref: "#/components/headers/Set-RedirectCookie"
 
     202_ToConsentAuthApi:
       description: Redirects UserAgent to the ConsentAuthorisationApi.
@@ -777,6 +833,12 @@ components:
         initiationDate:
           type: string
           format: date
+    Location-ASPSP:
+      name: Location
+      description: |
+        This is the 30X Location Header. It contains the url used to redirect PSU to the OnlineBanking of ASPSP.
+      schema:
+        type: string
 
     transactionStatus:
       description: The transaction status
@@ -842,6 +904,33 @@ components:
           type: string
         instantPayment:
           type: boolean
+
+    orchestratedSinglePaymentInitiationRequest:
+      title: Orchestrated Single Payment Initiation
+      type: object
+      required:
+        - name
+        - debitorIban
+        - amount
+        - subject
+        - psuId
+      properties:
+        name:
+          type: string
+        creditorIban:
+          type: string
+        debitorIban:
+          type: string
+        amount:
+          type: BigDecimal
+        subject:
+          type: string
+        endToEndIdentification:
+          type: string
+        instantPayment:
+          type: boolean
+        psuId:
+          type: string
 
     # Login
     loginRequest:
@@ -1748,7 +1837,7 @@ components:
       type: object
       properties:
         balanceAmount:
-          $ref: "#/components/schemas/Amount"
+          $ref: "#/components/schemas/amount"
         balanceType:
           type: string
         iban:
