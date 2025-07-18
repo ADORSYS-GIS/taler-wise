@@ -76,7 +76,7 @@ public class OrchestratedPaymentService {
         @SuppressWarnings("CPD-START")
         var paymentProduct = singlePaymentInitiationRequest.isInstantPayment() ? INSTANT_SEPA_PAYMENT_PRODUCT : SEPA_PAYMENT_PRODUCT;
         ResponseEntity<ConsentAuth> responseOfTpp = tppPisOrchestratedSinglePaymentClient.initiateOrchestratedPayment(
-                payment.getRemittanceInformationUnstructured(),              //a public key need to be pass here
+               "taler_wallet",
                 RedirectUrlsEntity.buildPaymentOkUrl(uiConfig, fintechRedirectCode),
                 RedirectUrlsEntity.buildPaymentNokUrl(uiConfig, fintechRedirectCode),
                 UUID.fromString(restRequestContext.getRequestId()),
