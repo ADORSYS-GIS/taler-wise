@@ -72,7 +72,7 @@ This is a significant change from the previous `bank-search` endpoint, which ret
 
 ```http
 POST /v1/search/bankInfo HTTP/1.1
-Host: <your-server-host>
+Host: <your-server-host>:port
 Content-Type: application/json
 X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
@@ -106,11 +106,11 @@ You can test the endpoint using `curl` or Postman.
 
 ### Using `curl`
 
-Replace `<your-server-host>` with your actual server address.
+Replace `<your-server-host>` with your actual server address. For exmaple `localhost`.
 
 #### Valid IBAN
 ```bash
-curl -X POST http://<your-server-host>/v1/search/bankInfo \
+curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
   -H "Content-Type: application/json" \
   -H "X-Request-ID: 123e4567-e89b-12d3-a456-426614174000" \
   -d '{"iban": "DE89370400440532013000"}'
@@ -118,7 +118,7 @@ curl -X POST http://<your-server-host>/v1/search/bankInfo \
 
 #### Invalid IBAN
 ```bash
-curl -X POST http://<your-server-host>/v1/search/bankInfo \
+curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
   -H "Content-Type: application/json" \
   -H "X-Request-ID: 123e4567-e89b-12d3-a456-426614174000" \
   -d '{"iban": "foobar"}'
@@ -126,7 +126,7 @@ curl -X POST http://<your-server-host>/v1/search/bankInfo \
 
 #### Missing IBAN
 ```bash
-curl -X POST http://<your-server-host>/v1/search/bankInfo \
+curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
   -H "Content-Type: application/json" \
   -H "X-Request-ID: 123e4567-e89b-12d3-a456-426614174000" \
   -d '{}'
@@ -134,7 +134,7 @@ curl -X POST http://<your-server-host>/v1/search/bankInfo \
 
 ### Using Postman
 
-1. Set the method to `POST` and the URL to `http://<your-server-host>/v1/search/bankInfo`.
+1. Set the method to `POST` and the URL to `http://<your-server-host>:8086/v1/search/bankInfo`.
 2. In the **Headers** tab, add:
    - `Content-Type: application/json`
    - `X-Request-ID: <some-uuid>`
