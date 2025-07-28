@@ -6,19 +6,19 @@ This guide provides step-by-step instructions for end users to test the `/v1/sea
 
 ## 📋 Table of Contents
 
-1. [Overview](#overview)
-2. [Why IBAN Search?](#why-iban-search)
-3. [Results Returned](#results-returned)
-4. [Request Structure](#request-structure)
-5. [Expected Responses](#expected-responses)
-6. [How to Test](#how-to-test)
-7. [Example Test Cases](#example-test-cases)
-8. [Troubleshooting](#troubleshooting)
-9. [Support](#support)
+1. [Overview](#1-overview)
+2. [Why IBAN Search?](#2-why-iban-search)
+3. [Results Returned](#3-results-returned)
+4. [Request Structure](#4-request-structure)
+5. [Expected Responses](#5-expected-responses)
+6. [How to Test](#6-how-to-test)
+7. [Example Test Cases](#7-example-test-cases)
+8. [Troubleshooting](#8-troubleshooting)
+9. [Support](#9-support)
 
 ---
 
-## 1. 📝 Overview
+## 1. Overview
 
 - **Endpoint URL:** `/v1/search/bankInfo`
 - **Method:** `POST`
@@ -28,7 +28,7 @@ This guide provides step-by-step instructions for end users to test the `/v1/sea
 
 ---
 
-## 2. 🔄 Why IBAN Search?
+## 2. Why IBAN Search?
 
 Previously, the application used a `bank-search` endpoint that allowed users to search for banks by name or keyword. This approach returned a list of banks and their profiles, requiring users to filter and select the correct bank profile manually.
 
@@ -36,7 +36,26 @@ With the new IBAN search endpoint, users can directly retrieve the bank informat
 
 ---
 
-## 3. 📦 Results Returned
+### 2.1 Test Data Source: xs2a-banks Context
+
+> **Important:** The IBANs you use for testing this endpoint must exist in the pre-loaded bank data provided by the `xs2a-banks` context.
+
+The Taler Wise and Open Banking Gateway setup uses a database migration context called `xs2a-banks` to preload a set of test banks and their IBANs into the system. This ensures that your test IBANs will return valid results when querying the `/v1/search/bankInfo` endpoint.
+
+**Relevant configuration snippet:**
+Navigate to the `open-banking-gateway` and modify the file `opba-embedded-starter/src/main/resources/application.yml` - Line 46
+```yaml
+# Which migrations types to apply (pre-load bank data into database)
+contexts: dev, mock-banks, xs2a-banks
+```
+
+- The `contexts: dev, mock-banks, xs2a-banks` line ensures that the `xs2a-banks` dataset is loaded into your database at startup.
+- Only IBANs present in this dataset will return valid bank information. If you use an IBAN not included in `xs2a-banks`, you will receive a `404 Not Found` response.
+- To find valid IBANs for testing, refer to the `xs2a-banks` dataset or use the example IBANs provided in this guide (such as `DE89370400440532013000`).
+
+---
+
+## 3. Results Returned
 
 The `/v1/search/bankInfo` endpoint returns a single object containing the metadata for the bank associated with the provided IBAN. The response includes:
 
@@ -59,7 +78,7 @@ This is a significant change from the previous `bank-search` endpoint, which ret
 
 ---
 
-## 2. 📨 Request Structure
+## 4. Request Structure
 
 ### Headers
 - `X-Request-ID`: Unique identifier for the request (must be a valid UUID)
@@ -83,7 +102,7 @@ X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
 ---
 
-## 3. ✅ Expected Responses
+## 5. Expected Responses
 
 - **200 OK**: Returns bank metadata for the given IBAN.
   ```json
@@ -100,7 +119,7 @@ X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
 ---
 
-## 4. 🧪 How to Test
+## 6. How to Test
 
 You can test the endpoint using `curl` or Postman.
 
@@ -148,7 +167,7 @@ curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
 
 ---
 
-## 5. 🧾 Example Test Cases
+## 7. Example Test Cases
 
 | Test Case                | Request Body                        | Expected Status | Notes                        |
 |--------------------------|-------------------------------------|-----------------|------------------------------|
@@ -160,7 +179,7 @@ curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
 
 ---
 
-## 6. 🛠️ Troubleshooting
+## 8. Troubleshooting
 
 - Ensure the Taler Wise server is running and accessible at the specified host and port.
 - Use a valid UUID for the `X-Request-ID` header (e.g., generated with `uuidgen`).
@@ -171,7 +190,7 @@ curl -X POST http://<your-server-host>:8086/v1/search/bankInfo \
 
 ---
 
-## 7. 🆘 Support
+## 9. Support
 
 If you encounter issues not covered in this guide:
 
