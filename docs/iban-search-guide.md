@@ -78,6 +78,37 @@ This is a significant change from the previous `bank-search` endpoint, which ret
 
 ---
 
+### 3.1 What’s Next: Using the `uuid` for Payment Initiation
+
+After you receive the response from the IBAN search endpoint, you will typically use the returned `uuid` as the `{bank-id}` parameter in the payment initiation endpoint. This links your payment request to the correct bank profile.
+
+**Example Flow:**
+1. **Call `/v1/search/bankInfo`** with an IBAN.
+2. **Extract the `uuid`** from the response.
+3. **Use the `uuid`** in the next API call:
+   ```http
+   POST /v1/pis/banks/{bank-id}/accounts/{account-id}/orchestrated/payments/single
+   Content-Type: application/json
+
+   {
+     "name": "string",
+     "debitorIban": "DE89370400440532013000",
+     "amount": "19",
+     "psuId": "string",
+     "purpose": "Payment for invoice 123",
+     "subject": "123",
+     "endToEndIdentification": "E2E123456",
+     "instantPayment": false
+   }
+   ```
+   - Replace `{bank-id}` with the `uuid` from the IBAN search response.
+   - Replace `{account-id}` with the IBAN or account identifier you want to use for the payment.
+
+**Why is this important?**
+The `uuid` ensures that all subsequent operations (like payment initiation) are performed against the correct bank profile.
+
+---
+
 ## 4. Request Structure
 
 ### Headers
