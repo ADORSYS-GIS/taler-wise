@@ -3,7 +3,7 @@ package de.adorsys.opba.fintech.impl.service;
 import de.adorsys.opba.fintech.api.model.generated.InlineResponseBankInfo;
 import de.adorsys.opba.fintech.impl.controller.utils.RestRequestContext;
 import de.adorsys.opba.fintech.impl.mapper.BankInfoMapper;
-import de.adorsys.opba.fintech.impl.service.exceptions.InvalidIbanException;
+import de.adorsys.opba.fintech.impl.exceptions.InvalidIbanException;
 import de.adorsys.opba.fintech.impl.tppclients.TppIbanSearchClient;
 import de.adorsys.opba.tpp.bankinfo.api.model.generated.BankInfoResponse;
 import de.adorsys.opba.tpp.bankinfo.api.model.generated.SearchBankinfoBody;
