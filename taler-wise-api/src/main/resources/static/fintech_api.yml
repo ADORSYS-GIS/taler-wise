@@ -20,6 +20,8 @@ externalDocs:
 tags:
   - name: FinTechAuthorization
     description: Example Financial web service provided by the FinTech.
+  - name: FinTechConfiguration
+    description: Service configuration and information endpoints.
 paths:
   /v1/login/oauth2:
     get:
@@ -199,10 +201,10 @@ paths:
             schema:
               $ref: "#/components/schemas/singlePaymentInitiationRequest"
             example:
-             name: string
-             debtoriban: DE38760700240320465700
-             amount: 12
-             subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
+              name: string
+              debtoriban: DE38760700240320465700
+              amount: 12
+              subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
       responses:
         "202":
           $ref: "#/components/responses/202_ToConsentAuthApi"
@@ -248,6 +250,71 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
+  /v1/config:
+    get:
+      tags:
+        - FinTechConfiguration
+      operationId: getServiceConfig
+      summary: Get service provider configuration
+      description: |
+        This endpoint returns the service provider name and logo link.
+      parameters:
+        - $ref: "#/components/parameters/X-Request-ID"
+      responses:
+        "200":
+          description: Service configuration information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceConfig"
+        "404":
+          $ref: "#/components/responses/404_NotFound"
+
+  /v1/terms:
+    get:
+      tags:
+        - FinTechConfiguration
+      operationId: getTermsOfUse
+      summary: Get terms of use
+      description: |
+        This endpoint returns the terms of use for the service.
+      parameters:
+        - $ref: "#/components/parameters/X-Request-ID"
+      responses:
+        "200":
+          description: Terms of use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TermsOfUse"
+            text/plain:
+              schema:
+                type: string
+        "404":
+          $ref: "#/components/responses/404_NotFound"
+
+  /v1/privacy:
+    get:
+      tags:
+        - FinTechConfiguration
+      operationId: getPrivacyPolicy
+      summary: Get privacy policy
+      description: |
+        This endpoint returns the privacy policy for the service.
+      parameters:
+        - $ref: "#/components/parameters/X-Request-ID"
+      responses:
+        "200":
+          description: Privacy policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyPolicy"
+            text/plain:
+              schema:
+                type: string
+        "404":
+          $ref: "#/components/responses/404_NotFound"
 
 components:
   securitySchemes:
@@ -970,7 +1037,7 @@ components:
     InlineResponseBankInfo:
       type: object
       description: |
-        Contains metadata about a bank, as determined from a provided IBAN. 
+        Contains metadata about a bank, as determined from a provided IBAN.
         Used to display or verify bank details in client applications.
       required:
         - bankName
@@ -1850,3 +1917,73 @@ components:
         referenceDate:
           type: string
           format: date
+
+    ServiceConfig:
+      title: Service Configuration
+      type: object
+      required:
+        - serviceProviderName
+        - logoUrl
+      properties:
+        serviceProviderName:
+          type: string
+          description: Name of the service provider
+          example: "Taler-Wise Financial Services"
+        logoUrl:
+          type: string
+          format: uri
+          description: URL to the service provider logo
+          example: "https://example.com/logo.png"
+
+    TermsOfUse:
+      title: Terms of Use
+      type: object
+      required:
+        - content
+        - lastUpdated
+      properties:
+        content:
+          type: string
+          description: Terms of use content
+        lastUpdated:
+          type: string
+          format: date
+          description: Date when terms were last updated
+        version:
+          type: string
+          description: Version of the terms
+          example: "1.0"
+
+    PrivacyPolicy:
+      title: Privacy Policy
+      type: object
+      required:
+        - content
+        - lastUpdated
+      properties:
+        content:
+          type: string
+          description: Privacy policy content
+        lastUpdated:
+          type: string
+          format: date
+          description: Date when policy was last updated
+        version:
+          type: string
+          description: Version of the privacy policy
+          example: "1.0"
+
+    ErrorResponse:
+      title: Error Response
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the error
