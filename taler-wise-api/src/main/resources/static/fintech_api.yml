@@ -20,49 +20,7 @@ externalDocs:
 tags:
   - name: FinTechAuthorization
     description: Example Financial web service provided by the FinTech.
-  - name: FinTechConfiguration
-    description: Service configuration and information endpoints.
 paths:
-  /v1/login/oauth2:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: callbackGetLogin
-      summary: Oauth2 callback to identify user.
-      description: |
-        Oauth2 callback to authenticate user using some Oauth2 identity provider account. Provider id is set inside state.
-      parameters:
-        #query
-        - name: code
-          in: query
-          required: true
-          description: OAuth2 redirect code
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: OAuth2 redirect state
-          schema:
-            type: string
-        - name: scope
-          in: query
-          required: true
-          description: OAuth2 requested scope
-          schema:
-            type: string
-        - name: error
-          in: query
-          required: false
-          description: OAuth2 error
-          schema:
-            type: string
-      responses:
-        "200":
-          $ref: "#/components/responses/200_UserProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
   /v1/search/bankInfo:
     post:
       tags:
@@ -217,10 +175,10 @@ paths:
             schema:
               $ref: "#/components/schemas/singlePaymentInitiationRequest"
             example:
-              name: string
-              debtoriban: DE38760700240320465700
-              amount: 12
-              subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
+             name: string
+             debtoriban: DE38760700240320465700
+             amount: 12
+             subject: Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0
       responses:
         "202":
           $ref: "#/components/responses/202_ToConsentAuthApi"
@@ -266,85 +224,6 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-  /v1/pis/callback/{authSessionId}/{aspspRedirectCode}:
-    get:
-      tags:
-        - CallbackFromASPSP
-      operationId: callbackFromAspsp
-      parameters:
-        - $ref: "#/components/parameters/authSessionId"
-        - $ref: "#/components/parameters/aspspRedirectCode"
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ToConsentAuthApi"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/config:
-    get:
-      tags:
-        - FinTechConfiguration
-      operationId: getServiceConfig
-      summary: Get service provider configuration
-      description: |
-        This endpoint returns the service provider name and logo link.
-      parameters:
-        - $ref: "#/components/parameters/X-Request-ID"
-      responses:
-        "200":
-          description: Service configuration information
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServiceConfig"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
-
-  /v1/terms:
-    get:
-      tags:
-        - FinTechConfiguration
-      operationId: getTermsOfUse
-      summary: Get terms of use
-      description: |
-        This endpoint returns the terms of use for the service.
-      parameters:
-        - $ref: "#/components/parameters/X-Request-ID"
-      responses:
-        "200":
-          description: Terms of use
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TermsOfUse"
-            text/plain:
-              schema:
-                type: string
-        "404":
-          $ref: "#/components/responses/404_NotFound"
-
-  /v1/privacy:
-    get:
-      tags:
-        - FinTechConfiguration
-      operationId: getPrivacyPolicy
-      summary: Get privacy policy
-      description: |
-        This endpoint returns the privacy policy for the service.
-      parameters:
-        - $ref: "#/components/parameters/X-Request-ID"
-      responses:
-        "200":
-          description: Privacy policy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PrivacyPolicy"
-            text/plain:
-              schema:
-                type: string
-        "404":
-          $ref: "#/components/responses/404_NotFound"
 
 components:
   securitySchemes:
@@ -874,7 +753,6 @@ components:
     200_sessionStatusResponse:
       description: |
        Ok
-
       headers:
         X-Request-ID:
           $ref: "#/components/headers/X-Request-ID"
@@ -1134,7 +1012,7 @@ components:
     InlineResponseBankInfo:
       type: object
       description: |
-        Contains metadata about a bank, as determined from a provided IBAN.
+        Contains metadata about a bank, as determined from a provided IBAN. 
         Used to display or verify bank details in client applications.
       required:
         - bankName
