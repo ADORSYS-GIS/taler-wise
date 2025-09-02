@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -30,6 +31,7 @@ public class PaymentEntity {
 
     private String bankId;
     private String accountId;
+    private UUID tppServiceSessionId;
     private String tppAuthId;
     private String paymentProduct;
 
