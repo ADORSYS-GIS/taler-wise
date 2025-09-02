@@ -128,6 +128,22 @@ paths:
         "404":
           $ref: "#/components/responses/404_NotFound"
 
+  /v1/{authSessionId}/{payment-product}/{bank-id}/status:
+    get:
+      tags:
+        - FintechGetPaymentStatus
+      operationId: getPaymentStatus
+      parameters:
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/authSessionId"
+        - $ref: "#/components/parameters/PaymentProduct"
+        - $ref: "#/components/parameters/bank-id"
+      responses:
+        "200":
+          $ref: "#/components/responses/200_sessionStatusResponse"
+        "401":
+          $ref: "#/components/responses/401_Unauthorized"
+
   /v1/{auth-id}/fromPayment/{ok-or-notok}:
     get:
       tags:
@@ -247,6 +263,20 @@ paths:
       responses:
         "202":
           $ref: "#/components/responses/202_To_OBA"
+        "401":
+          $ref: "#/components/responses/401_Unauthorized"
+
+  /v1/pis/callback/{authSessionId}/{aspspRedirectCode}:
+    get:
+      tags:
+        - CallbackFromASPSP
+      operationId: callbackFromAspsp
+      parameters:
+        - $ref: "#/components/parameters/authSessionId"
+        - $ref: "#/components/parameters/aspspRedirectCode"
+      responses:
+        "202":
+          $ref: "#/components/responses/202_ToConsentAuthApi"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
@@ -421,6 +451,15 @@ components:
       schema:
         type: string
 
+    Service-Session-ID:
+      required: true
+      description: |
+        Unique ID that identifies service session. Can be used for batch processing to correlate input and output.
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
   parameters:
     Fintech-Redirect-URL-OK:
       # the description must not be added. currently fintech-ui codegenerate fails, if non-standard-header field has description
@@ -442,6 +481,34 @@ components:
         type: string
       example: "https://example.com/myservice?auth-id=sf3x;authResult=failure"
 
+    PaymentProduct:
+      name: payment-product
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+          - target-2-payments
+          - cross-border-credit-transfers
+          - pain.001-sepa-credit-transfers
+          - pain.001-instant-sepa-credit-transfers
+          - pain.001-target-2-payments
+          - pain.001-cross-border-credit-transfers
+
+    authSessionId:
+      name: authSessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    aspspRedirectCode:
+      name: aspspRedirectCode
+      in: path
+      required: true
+      schema:
+        type: string
     Fintech-Decoupled-Preferred:
       name: Fintech-Decoupled-Preferred
       required: false
@@ -749,6 +816,8 @@ components:
             $ref: "#/components/headers/Location-ASPSP"
           X-Request-ID:
             $ref: "#/components/headers/X-Request-ID"
+          Service-Session-ID:
+            $ref: "#/components/headers/Service-Session-ID"
           Set-Cookie:
             $ref: "#/components/headers/Set-RedirectCookie"
 
@@ -792,7 +861,6 @@ components:
       description: |
         Request reload of a designated page of the FinTechUI. Reloaded UI will use
         stored xsrfToken/SessionCookie.
-
       headers:
         Location:
           $ref: "#/components/headers/Location-FinTechUI"
@@ -802,6 +870,18 @@ components:
           $ref: "#/components/headers/X-XSRF-TOKEN"
         Set-Cookie:
           $ref: "#/components/headers/Set-SessionCookie"
+
+    200_sessionStatusResponse:
+      description: |
+       Ok
+
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/paymentStatusResponse"
 
     400_BadRequest:
       description: Bad request
@@ -900,6 +980,23 @@ components:
         initiationDate:
           type: string
           format: date
+    paymentStatusResponse:
+      description: response from open banking gateway
+      type: object
+      required:
+        - transactionStatus
+        - psuMessageText
+      properties:
+        externalResourceId:
+          description: Identifier of the account in 3rd party data provider like FinAPI (similar to resourceId)
+          type: string
+        transactionStatus:
+          $ref: "#/components/schemas/transactionStatus"
+        fundsAvailable:
+          $ref: "#/components/schemas/fundsAvailable"
+        psuMessage:
+          $ref: "#/components/schemas/psuMessageText"
+
     Location-ASPSP:
       name: Location
       description: |
@@ -1440,6 +1537,15 @@ components:
       maxLength: 35
       description: Mobile phone number.
       example: "+49 170 1234567"
+
+    psuMessageText:
+      description: Text to be displayed to the PSU.
+      type: string
+      maxLength: 500
+
+    fundsAvailable:
+      description: Equals true if sufficient funds are available at the time of the request, false otherwise.
+      type: boolean
 
     pan:
       description: |

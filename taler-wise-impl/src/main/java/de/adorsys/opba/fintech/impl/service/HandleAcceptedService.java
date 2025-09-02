@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.UUID;
 
 import static de.adorsys.opba.fintech.impl.tppclients.HeaderFields.FIN_TECH_REDIRECT_CODE;
 import static de.adorsys.opba.fintech.impl.tppclients.HeaderFields.SERVICE_SESSION_ID;
@@ -67,6 +68,8 @@ public class HandleAcceptedService {
                                 .bankId(bankId)
                                 .accountId(accountId)
                                 .paymentProduct(paymentProduct)
+                                .tppServiceSessionId(UUID.fromString(headers.getFirst(SERVICE_SESSION_ID)))
+                                .tppAuthId(authId)
 
                         .build()
                 ));
@@ -80,6 +83,7 @@ public class HandleAcceptedService {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add(FIN_TECH_REDIRECT_CODE, fintechRedirectCode);
         responseHeaders.setLocation(location);
+        responseHeaders.add(TPP_AUTH_ID, authId);
 
         return new ResponseEntity<>(null, responseHeaders, ACCEPTED);
     }
