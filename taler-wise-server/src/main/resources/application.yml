@@ -122,11 +122,11 @@ service-info:
   # Terms of use configuration
   terms:
     content: |
-     <"your-terms-of-service">
-#      file-path: "<"path/to/file>"
+     <your-terms-of-service>
+#      file-path: "<path/to/file>"
 
   # Privacy policy configuration
   privacy:
     content: |
-      <"your-privacy-policy">
-#      file-path: "<"path/to/file>"
+      <your-privacy-policy>
+#      file-path: "<path/to/file>"
