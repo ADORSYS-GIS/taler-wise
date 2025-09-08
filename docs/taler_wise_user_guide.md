@@ -158,7 +158,7 @@ curl http://localhost:8086/actuator/health
 ```bash
 curl -X POST http://localhost:8086/v1/pis/banks/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/accounts/DE38760700240320465700/orchestrated/payments/single   -H "Content-Type: application/json"   -H "X-Request-ID: $(uuidgen)"   -H "Fintech-Redirect-URL-OK: http://localhost:4200/success"   -H "Fintech-Redirect-URL-NOK: http://localhost:4200/error"   -d '{
    "name": "string",
-"debtoriban": "DE38760700240320465700",
+"debtorIban": "DE38760700240320465700",
 "amount": 12,
 "subject": "Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0",
 "psuId": "max.musterman"
