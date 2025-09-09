@@ -18,50 +18,9 @@ externalDocs:
   x-version: "1.0"
 
 tags:
-  - name: FinTechAuthorization
-    description: Example Financial web service provided by the FinTech.
   - name: FinTechConfiguration
     description: Service configuration and information endpoints.
 paths:
-  /v1/login/oauth2:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: callbackGetLogin
-      summary: Oauth2 callback to identify user.
-      description: |
-        Oauth2 callback to authenticate user using some Oauth2 identity provider account. Provider id is set inside state.
-      parameters:
-        #query
-        - name: code
-          in: query
-          required: true
-          description: OAuth2 redirect code
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: OAuth2 redirect state
-          schema:
-            type: string
-        - name: scope
-          in: query
-          required: true
-          description: OAuth2 requested scope
-          schema:
-            type: string
-        - name: error
-          in: query
-          required: false
-          description: OAuth2 error
-          schema:
-            type: string
-      responses:
-        "200":
-          $ref: "#/components/responses/200_UserProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
 
   /v1/search/bankInfo:
     post:
@@ -102,31 +61,6 @@ paths:
         "404":
           $ref: "#/components/responses/404_NotFound"
 
-  /v1/{auth-id}/fromConsent/{ok-or-notok}:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: fromConsentGET
-      summary: Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      description: |
-        Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      parameters:
-        #path
-        - $ref: "#/components/parameters/auth-id"
-        - $ref: "#/components/parameters/ok-or-notok"
-        #query
-        - $ref: "#/components/parameters/redirectCode"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-      security:
-        - redirectCookie: []
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ReloadUI"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
 
   /v1/{authSessionId}/{payment-product}/{bank-id}/status:
     get:
@@ -143,32 +77,6 @@ paths:
           $ref: "#/components/responses/200_sessionStatusResponse"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
-
-  /v1/{auth-id}/fromPayment/{ok-or-notok}:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: fromPaymentGET
-      summary: Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      description: |
-        Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      parameters:
-        #path
-        - $ref: "#/components/parameters/auth-id"
-        - $ref: "#/components/parameters/ok-or-notok"
-        #query
-        - $ref: "#/components/parameters/redirectCode"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-      security:
-        - redirectCookie: []
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ReloadUI"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
 
   /v1/pis/banks/{bank-id}/accounts/{account-id}/payments/single:
     get:

@@ -159,7 +159,7 @@ curl -i -X POST http://localhost:8086/v1/pis/banks/2d8b3e75-9e3e-4fd2-b79c-06355
 "psuId": "max.musterman"
   }'
 ```
-**Note**: You have to keep the value of the response header **Authorization-Session-ID** it will be helful to get the status of the payment we will explain it later.
+**Note**: You have to keep the value of the response header **Authorization-Session-ID** it will be helpful to get the status of the payment we will explain it later.
 
 ### 2. Retrieve Redirection link
 
