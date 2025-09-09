@@ -103,8 +103,8 @@ protocol:
     urls:
       pis:
         web-hooks:
-          ok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/ok
-          nok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/nok
+          ok: http://localhost:8085/v1/callback/{authSessionId}/{aspspRedirectCode}/ok
+          nok: http://localhost:8085/v1/callback/{authSessionId}/{aspspRedirectCode}/nok
 ```
 ### Start Openbanking Gateway Server
 
@@ -188,7 +188,8 @@ protocol:
   xs2a:
     urls:
       pis:
-       ok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/ok
+        web-hooks:
+          ok: http://localhost:8085/v1/callback/{authSessionId}/{aspspRedirectCode}/ok
    ```
 
 It will actually lead you to a blank page but just to give you an idea you can create a screen responsible to handle this redrection from the online banking application and make it trigger our endpoint the only thing that you will need to change is the value of the property above and put the link of your screen. Example: ``` ok:localhost:4200/redirection-page-from-aspsp```
@@ -199,7 +200,8 @@ protocol:
   xs2a:
     urls:
       pis:
-       nok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/nok
+       web-hooks:
+         nok: http://localhost:8085/v1/callback/{authSessionId}/{aspspRedirectCode}/nok
 ``` 
 
 ### 5. Get status of a payment

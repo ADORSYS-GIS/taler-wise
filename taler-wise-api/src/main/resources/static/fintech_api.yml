@@ -266,20 +266,6 @@ paths:
         "401":
           $ref: "#/components/responses/401_Unauthorized"
 
-  /v1/pis/callback/{authSessionId}/{aspspRedirectCode}:
-    get:
-      tags:
-        - CallbackFromASPSP
-      operationId: callbackFromAspsp
-      parameters:
-        - $ref: "#/components/parameters/authSessionId"
-        - $ref: "#/components/parameters/aspspRedirectCode"
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ToConsentAuthApi"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-
   /v1/config:
     get:
       tags:
