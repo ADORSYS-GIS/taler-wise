@@ -22,7 +22,6 @@ The Taler Wise system consists of four main components:
 |-----------|------|---------|
 | **PostgreSQL** | 5432 | Database for Gateway Server and Taler Wise |
 | **OpenBanking Gateway** | 8085 | External API service for banking operations |
-| **Consent UI** | 4200 | Frontend for payment authorization flow |
 | **Taler Wise Server** | 8086 | Main application server |
 
 ---
@@ -36,8 +35,6 @@ Ensure the following are installed on your system:
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 - [Git](https://git-scm.com/)
 - [Java 21+](https://adoptium.net/)
-- [Node.js 18+](https://nodejs.org/)
-- [Angular CLI v19](https://angular.io/cli)
 - PostgreSQL client (optional, for manual DB inspection)
 
 ### Installation Verification
@@ -47,8 +44,6 @@ After installing prerequisites, verify your setup:
 ```bash
 # Verify installations
 java --version        # Should show Java 21+
-node --version        # Should show Node 18+
-ng version           # Should show Angular CLI 19
 docker --version     # Should show Docker version
 docker-compose --version
 
@@ -101,6 +96,15 @@ adorsys-sandbox-url: https://xs2a-connector-modelbank.support.sol.adorsys.com/
 adorsys-sandbox-oauth-server-url: https://xs2a-online-modelbank.support.sol.adorsys.com/
 ```
 
+Also update this callback url (we will explain it later):
+```yaml
+protocol:
+   xs2a:
+    urls:
+      pis:
+          ok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/ok
+          nok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/nok
+```
 ### Start Openbanking Gateway Server
 
 ```bash
@@ -121,17 +125,7 @@ curl http://localhost:8085/actuator/health
 # Should return {"status":"UP"}
 ```
 
-### 2. Setup Consent UI
-```bash
-cd ../consent-ui
-npm i
-ng serve --proxy-config=proxy-conf-local-backend.json
-```
-The Consent UI will start on port 4200.
-### Verification
-Navigate to http://localhost:4200 in your browser (this UI is used to managed informations after a payment so right now if you want to check if it is up in the browser you will have a blue empty screen and it is normal.)
-
-### 3. Start Taler Wise Server
+### 2. Start Taler Wise Server
 
 ```bash
 cd taler-wise 
@@ -156,14 +150,15 @@ curl http://localhost:8086/actuator/health
 ### 1. Initiate Payment via API
 
 ```bash
-curl -X POST http://localhost:8086/v1/pis/banks/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/accounts/DE38760700240320465700/orchestrated/payments/single   -H "Content-Type: application/json"   -H "X-Request-ID: $(uuidgen)"   -H "Fintech-Redirect-URL-OK: http://localhost:4200/success"   -H "Fintech-Redirect-URL-NOK: http://localhost:4200/error"   -d '{
+curl -i -X POST http://localhost:8086/v1/pis/banks/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/accounts/DE38760700240320465700/orchestrated/payments/single   -H "Content-Type: application/json"   -H "X-Request-ID: $(uuidgen)"   -H "Fintech-Redirect-URL-OK: http://localhost:4200/success"   -H "Fintech-Redirect-URL-NOK: http://localhost:4200/error"   -d '{
    "name": "string",
-"debtorIban": "DE38760700240320465700",
+"debitorIban": "DE38760700240320465700",
 "amount": 12,
 "subject": "Taler withdrawal 4MZT6RS3RVB3B0E2RDMYW0YRA3Y0VPHYV0CYDE6XBB0YMPFXCEG0",
 "psuId": "max.musterman"
   }'
 ```
+**Note**: You have to keep the value of the response header **Authorization-Session-ID** it will be helful to get the status of the payment we will explain it later.
 
 ### 2. Retrieve Redirection link
 
@@ -182,8 +177,156 @@ After initiating the payment, check the Taler Wise application logs for the redi
 #### - Select SCA method: Choose "Send Code" for SMS authentication
 #### - Enter SCA Code: Use the test code ``123456``
 #### - Complete Authentication: Follow the final confirmation steps
-#### - Verify the payment: You can login in our online banking as max.musterman with the same credentials and check his last payment using this link ``https://xs2a-online-modelbank.support.sol.adorsys.com/login``
 
+### 4. Redirect to the TPP page
+#### - After a successful payment
+In the previous version we were having something call the "consent-ui" that was actually managing everything related to authorisation we get rid of it just to stay with our Taler wise and the open banking gateway to keep things simple for the customer. To do that we created an intermediate endpoint as webhook to actually retrieve the aspspRedirectCode and the authSessionId from the aspsp website to be able to continue with our operations at our app level. Don't worry everything it is already implemented. When you are clicking on the button "Back to the TPP page" on the page of the online banking application of the user it will trigger this endpoint because of this property inside the application yml that we replaced earlier
+
+```
+protocol:
+  xs2a:
+    urls:
+      pis:
+       ok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/ok
+   ```
+
+It will actually lead you to a blank page but just to give you an idea you can create a screen responsible to handle this redrection from the online banking application and make it trigger our endpoint the only thing that you will need to change is the value of the property above and put the link of your screen. Example: ``` ok:localhost:4200/redirection-page-from-aspsp```
+#### - After an unsuccessful payment
+It is basically the same process than the one for the successful the only thing that is changing is the property that you need to change this time and our endpoint that you need to put there :
+```
+protocol:
+  xs2a:
+    urls:
+      pis:
+       nok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/nok
+``` 
+
+### 5. Get status of a payment
+
+This section documents how to use the getPaymentStatus endpoint to check the current status of a payment. This endpoint is used to retrieve the status of a payment initiated through a separate workflow.
+
+#### Endpoint Details
+
+This endpoint uses a GET request and requires specific parameters to be passed in the URL path. It provides a response with details about the transaction status.
+
+**** URL: GET /v1/{authSessionId}/{payment-product}/{bank-id}/status
+
+**** Method: GET
+
+**** Tags: FintechGetPaymentStatus
+
+**** Operation ID: getPaymentStatus
+
+#### Required Parameters
+
+| Parameter Name | Location | Type |Description
+|-----------|------|---------|---------------------|
+| **X-Request-ID** | Header | string (UUID) | A unique ID that identifies this request through the common workflow. Example: 99391c7e-ad88-49ec-a2ad-99ddcb1f7721|
+| **authSessionId** | Path | string | To simplify things just see it as a way to uniquely identify a payment in this case, a kind of paymentId (you can retrieve it in the response headers of the orchestrated payment initiation request)| 
+| **payment-product** | Path | string (Enum) | The type of payment product. Possible values include: sepa-credit-transfers, instant-sepa-credit-transfers, target-2-payments, cross-border-credit-transfers, and their pain.001 equivalents.|
+| **bank-id** | Path | string | The unique identifier for the bank. (to retrieve it use the ibanSearch endpoint )|
+
+#### Interpreting the Response
+
+A successful request will return a 200 OK response with a JSON object containing the payment status.
+
+Example Response:
+```json
+{
+    "transactionStatus": "ACSC",
+    "psuMessage": "Your payment has been successfully completed."
+}
+```
+The most important field in the response is ``transactionStatus``, which will provide the current status of the payment. This value is a string that indicates the state of the transaction within the bank's system. In our case we are working with ISO 20022 trasaction status codes, so the possible value of ``transacationStatus`` can be:
+
+- **ACCC**	(AcceptedSettlementCompleted, your payment has been fully settled and completed.)
+- **ACCP**	(AcceptedCustomerProfile, the payment initiation has been accepted based on your profile.)
+- **ACSC**	(AcceptedSettlementCompleted, your payment has been successfully completed.)
+- **ACSP**	(AcceptedSettlementInProcess, your payment has been accepted and is being processed.)
+- **ACTC**	(AcceptedTechnicalValidation, the payment passed technical checks and is being processed.)
+- **ACWC**	(AcceptedWithChange, your payment was accepted but with some changes applied.)
+- **ACWP**	(AcceptedWithoutPosting, your payment has been accepted but not yet posted to the account.)
+- **PDNG**	(Pending, your payment is pending. Please wait for confirmation.)
+- **RJCT**	(Rejected, your payment was rejected. Please contact your bank or check details.)
+- **RCVD**	(Received, your payment request has been received and is awaiting processing.)
+- **CANC**	(Cancelled, your payment request has been cancelled.)
+- **PART**	(Partially Accepted, your payment has been partially processed. Some parts were not executed.)
+
+The ``psuMessage`` may provide additional information to be displayed to the end-user.
+
+#### Example cURL Command
+You can use the following command structure to test the endpoint. Remember to replace <authSessionId> with the value of the response header **Authorization-Session-ID** from the orchestrated payment initiation request.
+
+```bash
+    curl -X GET 'http://localhost:8086/v1/<authSessionId>/instant-sepa-credit-transfers/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/status' \
+  -H "X-Request-ID: $(uuidgen)
+```
+
+### 6. Retrieve All Single Payments Endpoint
+
+This section documents how to use the retrieveAllSinglePayments endpoint to get a list of all single payments for a specific account. This method provides an overview of past payments initiated from the fintech side.
+
+#### Endpoint Details
+This endpoint uses a GET request and requires specific parameters to be passed in the URL path and header.
+
+- **URL**: GET /v1/pis/banks/{bank-id}/accounts/{account-id}/payments/single
+
+- **Method**: GET
+
+- **Summary**: Ask for all payments of this account
+
+- **Tags**: FintechRetrieveAllSinglePayments
+
+- **Operation ID**: retrieveAllSinglePayments
+
+#### Required Parameters
+
+To successfully call this endpoint, you must provide the following parameters and headers.
+
+| Parameter Name | Location | Type |Description
+|-----------|------|---------|---------------------|
+| **X-Request-ID** | Header | string (UUID) | A unique ID that identifies this request through the common workflow. Example: 99391c7e-ad88-49ec-a2ad-99ddcb1f7721|
+| **account-id** | Path | string | The unique identifier for the account of the user.| 
+| **bank-id** | Path | string | The unique identifier for the bank. (to retrieve it use the ibanSearch endpoint )|
+
+#### Interpreting the response
+
+A successful request will return a 200 OK response with an array of payments. Each payment object in the array contains detailed information about a single payment.
+
+Example Response:
+```json
+    [
+    {
+        "endToEndIdentification": "string",
+        "debtorAccount": {
+            "iban": "DE38760700240320465700",
+            "currency": "EUR"
+        },
+        "instructedAmount": {
+            "currency": "EUR",
+            "amount": "0.01"
+        },
+        "creditorAccount": {
+            "iban": "DE89370400440532013000",
+            "currency": "EUR"
+        },
+        "creditorName": "Demo Creditor",
+        "remittanceInformationUnstructured": "123",
+        "transactionStatus": "ACSC",
+        "initiationDate": "2025-09-04"
+    }
+]
+```
+The response is a list (type: array) of objects, where each object represents a single payment. The ```transactionStatus``` field provides the status of each payment.
+
+#### Example cURL Command
+
+You can use the following command structure to test the endpoint.
+
+```bash
+curl -X GET 'http://localhost:8086/v1/pis/banks/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/accounts/DE38760700240320465700/payments/single' \
+  -H "X-Request-ID: $(uuidgen)"
+```     
 ## Troubleshooting
 Important note: Always check the directory where you are during the process
 
