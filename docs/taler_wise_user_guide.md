@@ -260,7 +260,7 @@ You can use the following command structure to test the endpoint. Remember to re
 
 ```bash
     curl -X GET 'http://localhost:8086/v1/<authSessionId>/instant-sepa-credit-transfers/2d8b3e75-9e3e-4fd2-b79c-063556ad9ecc/status' \
-  -H "X-Request-ID: $(uuidgen)
+  -H "X-Request-ID: $(uuidgen)"
 ```
 
 ### 6. Retrieve All Single Payments Endpoint
