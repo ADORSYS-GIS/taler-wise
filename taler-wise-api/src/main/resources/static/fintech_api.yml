@@ -18,50 +18,9 @@ externalDocs:
   x-version: "1.0"
 
 tags:
-  - name: FinTechAuthorization
-    description: Example Financial web service provided by the FinTech.
   - name: FinTechConfiguration
     description: Service configuration and information endpoints.
 paths:
-  /v1/login/oauth2:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: callbackGetLogin
-      summary: Oauth2 callback to identify user.
-      description: |
-        Oauth2 callback to authenticate user using some Oauth2 identity provider account. Provider id is set inside state.
-      parameters:
-        #query
-        - name: code
-          in: query
-          required: true
-          description: OAuth2 redirect code
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: OAuth2 redirect state
-          schema:
-            type: string
-        - name: scope
-          in: query
-          required: true
-          description: OAuth2 requested scope
-          schema:
-            type: string
-        - name: error
-          in: query
-          required: false
-          description: OAuth2 error
-          schema:
-            type: string
-      responses:
-        "200":
-          $ref: "#/components/responses/200_UserProfile"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
 
   /v1/search/bankInfo:
     post:
@@ -102,57 +61,22 @@ paths:
         "404":
           $ref: "#/components/responses/404_NotFound"
 
-  /v1/{auth-id}/fromConsent/{ok-or-notok}:
-    get:
-      tags:
-        - FinTechAuthorization
-      operationId: fromConsentGET
-      summary: Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      description: |
-        Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      parameters:
-        #path
-        - $ref: "#/components/parameters/auth-id"
-        - $ref: "#/components/parameters/ok-or-notok"
-        #query
-        - $ref: "#/components/parameters/redirectCode"
-        #header
-        - $ref: "#/components/parameters/X-Request-ID"
-      security:
-        - redirectCookie: []
-      responses:
-        "202":
-          $ref: "#/components/responses/202_ReloadUI"
-        "401":
-          $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
 
-  /v1/{auth-id}/fromPayment/{ok-or-notok}:
+  /v1/{authSessionId}/{payment-product}/{bank-id}/status:
     get:
       tags:
-        - FinTechAuthorization
-      operationId: fromPaymentGET
-      summary: Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
-      description: |
-        Entry point when PSU is redirected back from ConsentAuthorisationApi to the FinTechUI.
+        - FintechGetPaymentStatus
+      operationId: getPaymentStatus
       parameters:
-        #path
-        - $ref: "#/components/parameters/auth-id"
-        - $ref: "#/components/parameters/ok-or-notok"
-        #query
-        - $ref: "#/components/parameters/redirectCode"
-        #header
         - $ref: "#/components/parameters/X-Request-ID"
-      security:
-        - redirectCookie: []
+        - $ref: "#/components/parameters/authSessionId"
+        - $ref: "#/components/parameters/PaymentProduct"
+        - $ref: "#/components/parameters/bank-id"
       responses:
-        "202":
-          $ref: "#/components/responses/202_ReloadUI"
+        "200":
+          $ref: "#/components/responses/200_sessionStatusResponse"
         "401":
           $ref: "#/components/responses/401_Unauthorized"
-        "404":
-          $ref: "#/components/responses/404_NotFound"
 
   /v1/pis/banks/{bank-id}/accounts/{account-id}/payments/single:
     get:
@@ -421,6 +345,15 @@ components:
       schema:
         type: string
 
+    Service-Session-ID:
+      required: true
+      description: |
+        Unique ID that identifies service session. Can be used for batch processing to correlate input and output.
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
   parameters:
     Fintech-Redirect-URL-OK:
       # the description must not be added. currently fintech-ui codegenerate fails, if non-standard-header field has description
@@ -442,6 +375,34 @@ components:
         type: string
       example: "https://example.com/myservice?auth-id=sf3x;authResult=failure"
 
+    PaymentProduct:
+      name: payment-product
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+          - target-2-payments
+          - cross-border-credit-transfers
+          - pain.001-sepa-credit-transfers
+          - pain.001-instant-sepa-credit-transfers
+          - pain.001-target-2-payments
+          - pain.001-cross-border-credit-transfers
+
+    authSessionId:
+      name: authSessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    aspspRedirectCode:
+      name: aspspRedirectCode
+      in: path
+      required: true
+      schema:
+        type: string
     Fintech-Decoupled-Preferred:
       name: Fintech-Decoupled-Preferred
       required: false
@@ -749,6 +710,8 @@ components:
             $ref: "#/components/headers/Location-ASPSP"
           X-Request-ID:
             $ref: "#/components/headers/X-Request-ID"
+          Service-Session-ID:
+            $ref: "#/components/headers/Service-Session-ID"
           Set-Cookie:
             $ref: "#/components/headers/Set-RedirectCookie"
 
@@ -792,7 +755,6 @@ components:
       description: |
         Request reload of a designated page of the FinTechUI. Reloaded UI will use
         stored xsrfToken/SessionCookie.
-
       headers:
         Location:
           $ref: "#/components/headers/Location-FinTechUI"
@@ -802,6 +764,18 @@ components:
           $ref: "#/components/headers/X-XSRF-TOKEN"
         Set-Cookie:
           $ref: "#/components/headers/Set-SessionCookie"
+
+    200_sessionStatusResponse:
+      description: |
+       Ok
+
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/paymentStatusResponse"
 
     400_BadRequest:
       description: Bad request
@@ -900,6 +874,23 @@ components:
         initiationDate:
           type: string
           format: date
+    paymentStatusResponse:
+      description: response from open banking gateway
+      type: object
+      required:
+        - transactionStatus
+        - psuMessageText
+      properties:
+        externalResourceId:
+          description: Identifier of the account in 3rd party data provider like FinAPI (similar to resourceId)
+          type: string
+        transactionStatus:
+          $ref: "#/components/schemas/transactionStatus"
+        fundsAvailable:
+          $ref: "#/components/schemas/fundsAvailable"
+        psuMessage:
+          $ref: "#/components/schemas/psuMessageText"
+
     Location-ASPSP:
       name: Location
       description: |
@@ -1440,6 +1431,15 @@ components:
       maxLength: 35
       description: Mobile phone number.
       example: "+49 170 1234567"
+
+    psuMessageText:
+      description: Text to be displayed to the PSU.
+      type: string
+      maxLength: 500
+
+    fundsAvailable:
+      description: Equals true if sufficient funds are available at the time of the request, false otherwise.
+      type: boolean
 
     pan:
       description: |
