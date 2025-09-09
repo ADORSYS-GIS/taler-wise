@@ -96,12 +96,13 @@ adorsys-sandbox-url: https://xs2a-connector-modelbank.support.sol.adorsys.com/
 adorsys-sandbox-oauth-server-url: https://xs2a-online-modelbank.support.sol.adorsys.com/
 ```
 
-Also update this callback url (we will explain it later):
+Also update this callback url (we will explain it further in the guide):
 ```yaml
 protocol:
    xs2a:
     urls:
       pis:
+        web-hooks:
           ok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/ok
           nok: http://localhost:8085/v1/banking/callback/{authSessionId}/{aspspRedirectCode}/nok
 ```
