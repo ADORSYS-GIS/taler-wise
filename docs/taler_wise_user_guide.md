@@ -181,7 +181,7 @@ After initiating the payment, check the Taler Wise application logs for the redi
 
 ### 4. Redirect to the TPP page
 #### - After a successful payment
-In the previous version we were having something call the "consent-ui" that was actually managing everything related to authorisation we get rid of it just to stay with our Taler wise and the open banking gateway to keep things simple for the customer. To do that we created an intermediate endpoint as webhook to actually retrieve the aspspRedirectCode and the authSessionId from the aspsp website to be able to continue with our operations at our app level. Don't worry everything it is already implemented. When you are clicking on the button "Back to the TPP page" on the page of the online banking application of the user it will trigger this endpoint because of this property inside the application yml that we replaced earlier
+In the previous version, we had something called the "consent-ui" that was actually managing everything related to authorisation. We removed it to stay with our taler-wise and the open banking gateway, keeping things simple for the customer. To do that, we created an intermediate endpoint as a webhook to actually retrieve the aspspRedirectCode and the authSessionId from the aspsp website to be able to continue with our operations at our app level. Don't worry, everything is already implemented. When you click on the button "Back to the TPP page" on the page of the online banking application of the user, it will trigger this endpoint because of this property inside the application.yml that we replaced earlier
 
 ```
 protocol:
@@ -192,9 +192,9 @@ protocol:
           ok: http://localhost:8085/v1/callback/{authSessionId}/{aspspRedirectCode}/ok
    ```
 
-It will actually lead you to a blank page but just to give you an idea you can create a screen responsible to handle this redrection from the online banking application and make it trigger our endpoint the only thing that you will need to change is the value of the property above and put the link of your screen. Example: ``` ok:localhost:4200/redirection-page-from-aspsp```
+It will actually lead you to a blank page, but just to give you an idea, you can create a screen responsible to handle this redirection from the online banking application and make it trigger our endpoint. The only thing that you will need to change is the value of the property above, and put the link of your screen. Example: ``` ok:localhost:4200/redirection-page-from-aspsp```
 #### - After an unsuccessful payment
-It is basically the same process than the one for the successful the only thing that is changing is the property that you need to change this time and our endpoint that you need to put there :
+It is basically the same process as the one for the successful; the only thing that is changing is the property that you need to change this time, and our endpoint that you need to put there :
 ```
 protocol:
   xs2a:
@@ -240,7 +240,7 @@ Example Response:
     "psuMessage": "Your payment has been successfully completed."
 }
 ```
-The most important field in the response is ``transactionStatus``, which will provide the current status of the payment. This value is a string that indicates the state of the transaction within the bank's system. In our case we are working with ISO 20022 trasaction status codes, so the possible value of ``transacationStatus`` can be:
+The most important field in the response is ``transactionStatus``, which will provide the current status of the payment. This value is a string that indicates the state of the transaction within the bank's system. In our case we are working with ISO 20022 transaction status codes, so the possible value of ``transactionStatus `` can be:
 
 - **ACCC**	(AcceptedSettlementCompleted, your payment has been fully settled and completed.)
 - **ACCP**	(AcceptedCustomerProfile, the payment initiation has been accepted based on your profile.)
